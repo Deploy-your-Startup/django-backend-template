@@ -1,0 +1,143 @@
+# PROVISIONING INFRASTRUCTURE
+- hosts: provision-infrastructure
+  connection: local
+  gather_facts: false
+  tasks:
+    - import_role:
+        name: "hetzner-server"
+      vars:
+        node_count: "{{ master_count }}"
+        node_type: master
+      tags: infrastructure
+
+    - import_role:
+        name: "hetzner-server"
+      vars:
+        node_count: "{{ worker_count }}"
+        node_type: worker
+      tags: infrastructure
+
+    - import_role:
+        name: "hetzner-loadbalancer"
+      when: create_load_balancer is defined and create_load_balancer
+      tags: infrastructure
+
+    - import_role:
+        name: "dns"
+      vars:
+        loadbalancer_ip: "{{ load_balancer_result.hcloud_load_balancer.ipv4_address | default(hostvars[project_name + '-master-0']['ansible_host'])}}"
+        domains: "{{ [base_domain] + additional_domains }}"
+      tags: infrastructure
+
+# CHECK INFRASTRUCTURE READY AND PROVISION EVERYTHING WE NEED
+- hosts: hcloud
+  gather_facts: false
+  tasks:
+    - name: "Wait for SSH to come up"
+      wait_for:
+        port: 22
+        host: "{{ ansible_host }}"
+        timeout: 300
+      tags: infrastructure
+      connection: local
+
+    - import_role:
+        name: k3s
+      tags: infrastructure,k3s
+
+    # ONLY RUN ON MASTER NODES
+    - name: "prepare kubeconfig for k8s ansible module"
+      import_role:
+        name: prepare-kubeconfig
+      tags: infrastructure
+      when: labels.get("type") == "master"
+
+    - name: "install python dependencies"
+      import_role:
+        name: python
+      tags: infrastructure
+
+    # ONlY RUN ONCE
+    - import_role:
+        name: "ingress"
+      when: create_load_balancer is defined and create_load_balancer
+      tags: infrastructure
+      run_once: true
+
+    - name: "deploy hetzner-csi-provider"
+      import_role:
+        name: hetzner-csi-provider
+      tags: infrastructure
+      run_once: true
+
+# DEPLOYMENT OF SERVICES
+- hosts: hcloud_type_master
+  run_once: true
+  tasks:
+    - name: "deploy docker-secrets"
+      import_role:
+        name: docker-secrets
+      tags: docker-secrets
+
+    - name: "deploy cert-manager"
+      import_role:
+        name: cert-manager
+      tags: cert-manager
+
+    - name: "deploy postgres"
+      import_role:
+        name: postgres
+      tags: postgres
+
+    - name: "copy auth-proxy role into deployment"
+      connection: local
+      copy:
+        src: ../auth-proxy/deployment/
+        dest: roles/auth-proxy
+      tags: auth-proxy
+
+    - name: "deploy auth-proxy"
+      include_role:
+        name: auth-proxy
+      tags: auth-proxy
+
+    - name: "deploy redis"
+      import_role:
+        name: redis
+      tags: redis
+
+    - name: "copy frontend role into deployment"
+      connection: local
+      copy:
+        src: ../frontend/deployment/
+        dest: roles/frontend
+      tags: frontend
+
+    - name: "deploy frontend"
+      include_role:
+        name: frontend
+      tags: frontend
+
+    - name: "copy backend role into deployment"
+      connection: local
+      copy:
+        src: ../backend/deployment/
+        dest: roles/backend
+      tags: backend
+
+    - name: "deploy backend"
+      include_role:
+        name: backend
+      tags: backend
+
+    - name: "copy ai role into deployment"
+      connection: local
+      copy:
+        src: ../ai/deployment/
+        dest: roles/ai
+      tags: ai
+
+    - name: "deploy ai"
+      include_role:
+        name: ai
+      tags: ai
