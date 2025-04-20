@@ -1,7 +1,7 @@
 env: production
 
-base_domain: [[ deploy_your_startup.base_domain ]]
-additional_domains: [[ deploy_your_startup.additional_domains ]]
+base_domain: §§deploy_your_startup.base_domain§§
+additional_domains: §§deploy_your_startup.additional_domains§§
 
 # Server
 k3s_token: !vault |
@@ -14,9 +14,9 @@ k3s_token: !vault |
 master_count: 1
 worker_count: 0
 
-docker_registry_host: [[ deploy_your_startup.docker_registry_host ]]
+docker_registry_host: §§deploy_your_startup.docker_registry_host§§
 
-postgres_version: [[ deploy_your_startup.postgres_version ]]
+postgres_version: §§deploy_your_startup.postgres_version§§
 
 # Backend database
 backend_db_name: backend_db
