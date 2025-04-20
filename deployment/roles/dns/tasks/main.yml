@@ -1,0 +1,39 @@
+- name: "Create domains"
+  community.digitalocean.digital_ocean_domain:
+    state: present
+    name: "{{ item }}"
+    oauth_token: "{{ digital_ocean_token }} | trim"
+  loop: "{{ domains }}"
+  loop_control:
+    pause: 3
+  tags: infrastructure
+
+- name: "Add DNS domain entry for @.{{ item }}"
+  community.digitalocean.digital_ocean_domain_record:
+    state: present
+    domain: "{{ item }}"
+    name: "@"
+    force_update: true
+    type: A
+    data: "{{ loadbalancer_ip }}"
+    ttl: 300
+    oauth_token: "{{ digital_ocean_token }} | trim"
+  loop: "{{ domains }}"
+  loop_control:
+    pause: 3
+  tags: infrastructure
+
+- name: "Add DNS domain entry for *.{{ item }}"
+  community.digitalocean.digital_ocean_domain_record:
+    state: present
+    domain: "{{ item }}"
+    name: "*"
+    force_update: true
+    type: A
+    data: "{{ loadbalancer_ip }}"
+    ttl: 300
+    oauth_token: "{{ digital_ocean_token }} | trim"
+  loop: "{{ domains }}"
+  loop_control:
+    pause: 3
+  tags: infrastructure

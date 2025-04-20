@@ -1,0 +1,11 @@
+- name: "deploy hetzner-csi-provider secrets"
+  k8s:
+    state: present
+    definition: "{{lookup('template', 'secrets.yml') }}"
+  tags: hetzner-csi-provider
+
+- name: "deploy hetzner-csi-provider"
+  k8s:
+    state: present
+    definition: "{{lookup('template', 'hcloud-csi.yml') }}"
+  tags: hetzner-csi-provider

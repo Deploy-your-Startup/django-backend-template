@@ -1,0 +1,21 @@
+- name: "install master k3s node"
+  shell: "curl -sfL https://get.k3s.io | sh -s - --cluster-init"
+  environment:
+    K3S_TOKEN: "{{ k3s_token }}"
+    INSTALL_K3S_EXEC: "--node-label type=master --node-taint node.kubernetes.io/unschedulable:NoSchedule"
+  when: labels.get("type") == "master" and inventory_hostname == project_name + '-master-0'
+
+- name: "add other master node to cluster"
+  shell: "curl -sfL https://get.k3s.io | sh -s - server --server https://{{ hostvars[project_name + '-master-0']['ansible_host'] }}:6443"
+  environment:
+    K3S_TOKEN: "{{ k3s_token }}"
+    INSTALL_K3S_EXEC: "--node-label type=master --node-taint node.kubernetes.io/unschedulable:NoSchedule"
+  when: labels.get("type") == "master" and inventory_hostname != project_name + '-master-0'
+
+- name: "add worker node"
+  shell: "curl -sfL https://get.k3s.io | sh -s - agent"
+  environment:
+    K3S_TOKEN: "{{ k3s_token }}"
+    K3S_URL: "https://{{ hostvars[project_name + '-master-0']['ansible_host'] }}:6443"
+    INSTALL_K3S_EXEC: "--node-label type=worker"
+  when: labels.get("type") == "worker"
