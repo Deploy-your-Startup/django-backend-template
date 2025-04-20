@@ -1,59 +1,193 @@
 #!/usr/bin/env python3
+"""
+Rotate Ansible vault passwords for files (full vault files or inline vault blocks).
+Features:
+- Atomic writes (no .bak backups)
+- Pathlib usage
+- Structured logging with levels
+- Dry-run mode
+- Progress bars with tqdm
+- Regex-based inline block handling (no ruamel.yaml)
+- Subcommands: rotate (all or specific file), status
+"""
 
 import argparse
-import os
+import logging
+import shutil
 import sys
 import re
+from pathlib import Path
 from tempfile import NamedTemporaryFile
+
 from ansible.parsing.vault import VaultEditor, VaultLib, VaultSecret
 from ansible.constants import DEFAULT_VAULT_IDENTITY
+from tqdm import tqdm
 
-def rotate_password(content, old_secret, new_secret):
-    # Regular expression to find vault blocks in the content
-    vault_regex = re.compile(r'(^(\s*)\$ANSIBLE_VAULT\S*\n(\s*\w+\n)*)', re.MULTILINE)
-    vaults = {match[0]: match[1] for match in vault_regex.findall(content)}
-    # Iterate through all vault blocks
-    for old_vault, indentation in vaults.items():
-        # Create a temporary file and write the old vault content
-        with NamedTemporaryFile(mode='w', delete=False) as temporary_file:
-            temporary_file.write(old_vault.replace(indentation, ''))
-        # Open the vault with the old password and re-encrypt with the new password
-        VaultEditor(VaultLib([(DEFAULT_VAULT_IDENTITY, old_secret)])).rekey_file(temporary_file.name, new_secret)
-        # Read the new vault content and insert it into the original content
-        with open(temporary_file.name) as temporary_file:
-            new_vault = indentation + indentation.join(temporary_file.readlines())
-            content = content.replace(old_vault, new_vault)
-    return content
+# Patterns for excluding files/directories
+EXCLUDED_PATTERNS = [
+    "*.pyc",
+    "__pycache__",
+    ".git",
+    "*.swp",
+]
 
-def main(old_password, new_password):
-    new_contents = []
-    # Iterate through all files in the current directory
-    for root, subdirs, files in os.walk('.'):
-        for file in files:
-            print('Processing file: {}'.format(file))
-            file_path = os.path.join(root, file)
-            # Read the file content
-            with open(file_path) as f:
-                content = f.read()
-            # Re-encrypt the file content with the new password and overwrite it
-            new_content = None
-            try:
-                new_content = rotate_password(content, VaultSecret(old_password.encode()), VaultSecret(new_password.encode()))
-            except Exception as e:
-                print(f"Something went wrong while parsing File '{file_path}' Error: {e}")
-                sys.exit(1)
-            if new_content:
-                new_contents.append((file_path, new_content))
-    # Write the new file contents
-    for file_path, new_content in new_contents:
-        with open(file_path, 'w') as f:
-            f.write(new_content)
+logger = logging.getLogger(__name__)
 
-# Call the main program with the command-line arguments provided
-if __name__ == '__main__':
-    # Read vault passwords from command-line arguments
-    parser = argparse.ArgumentParser(description='Rotate vault password')
-    parser.add_argument('--old_password', help='old vault password')
-    parser.add_argument('--new_password', help='new vault password')
-    args = parser.parse_args()
-    main(args.old_password, args.new_password)
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Rotate Ansible vault passwords"
+    )
+    parser.add_argument(
+        "--old-password", "-o", required=True, help="Old vault password"
+    )
+    parser.add_argument(
+        "--new-password", "-n", required=True, help="New vault password"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Don't write changes, only report"
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose (DEBUG) logging"
+    )
+    parser.add_argument(
+        "--jobs", "-j", type=int, default=1, help="Number of parallel jobs"
+    )
+
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    rotate = subparsers.add_parser("rotate", help="Rotate vault passwords")
+    rotate.add_argument(
+        "file", nargs="?", type=Path, help="Specific file to rotate (optional)"
+    )
+    subparsers.add_parser("status", help="List files with vaulted content")
+
+    return parser.parse_args()
+
+
+def setup_logging(verbose: bool):
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+
+def safe_write(path: Path, content: str):
+    """Atomically write content to a file (no backups)."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(content, encoding="utf-8")
+    tmp.replace(path)
+    logger.info(f"Updated: {path}")
+
+
+def is_excluded(path: Path) -> bool:
+    for pat in EXCLUDED_PATTERNS:
+        if path.match(pat):
+            return True
+    return False
+
+
+def walk_files(base: Path, specific: Path = None):
+    if specific:
+        if specific.is_file() and not is_excluded(specific):
+            yield specific
+        return
+    for path in base.rglob("*"):
+        if path.is_file() and not is_excluded(path):
+            yield path
+
+
+def is_full_vault_file(path: Path) -> bool:
+    try:
+        first_line = path.read_text(encoding="utf-8").splitlines()[0]
+        return first_line.startswith("$ANSIBLE_VAULT")
+    except Exception:
+        return False
+
+
+def list_status(args):
+    for path in walk_files(Path('.'), getattr(args, 'file', None)):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            if text.startswith("$ANSIBLE_VAULT") or "!vault" in text:
+                print(path)
+        except Exception as e:
+            logger.warning(f"Could not read {path}: {e}")
+
+
+def rotate_full_file(path: Path, old_secret: VaultSecret, new_secret: VaultSecret, dry_run: bool):
+    if dry_run:
+        logger.info(f"[DRY-RUN] Would rotate full vault file: {path}")
+        return
+    try:
+        VaultEditor(VaultLib([(DEFAULT_VAULT_IDENTITY, old_secret)])).rekey_file(str(path), new_secret)
+        logger.info(f"Rotated vault file: {path}")
+    except Exception as e:
+        logger.error(f"Error rotating vault file {path}: {e}")
+
+
+def rotate_inline_blocks(text: str, old_secret: VaultSecret, new_secret: VaultSecret) -> str:
+    if not text.endswith('\n'):
+        text += '\n'
+
+    multiline_regex = re.compile(
+        r'(?P<key>^\s*[^\s].*?:\s*)(?P<marker>!vault\s*\|)[\r\n]+'
+        r'(?P<content>(?P<indent>\s*)(?:\$ANSIBLE_VAULT[^\r\n]*[\r\n]+)'
+        r'(?:\s*[0-9A-Fa-f]+(?:[\r\n]+|$))+)',
+        re.MULTILINE
+    )
+
+    def repl(m):
+        key = m.group('key')
+        indent = m.group('indent')
+        raw = m.group('content')
+        block = ''.join(line[len(indent):] for line in raw.splitlines(True))
+        if not block.endswith('\n'):
+            block += '\n'
+        with NamedTemporaryFile(mode='w+', delete=False) as tmp:
+            tmp.write(block)
+            tmp.flush()
+            tmp_path = tmp.name
+        VaultEditor(VaultLib([(DEFAULT_VAULT_IDENTITY, old_secret)])).rekey_file(tmp_path, new_secret)
+        new_block = Path(tmp_path).read_text().splitlines(True)
+        Path(tmp_path).unlink()
+        recoded = ''.join(indent + line for line in new_block)
+        return f"{key}!vault |\n{recoded}"
+
+    return multiline_regex.sub(repl, text)
+
+
+def rotate_all(args):
+    old_secret = VaultSecret(args.old_password.encode())
+    new_secret = VaultSecret(args.new_password.encode())
+    files = list(walk_files(Path('.'), getattr(args, 'file', None)))
+
+    for path in tqdm(files, desc="Processing files", unit="file"):
+        try:
+            if is_full_vault_file(path):
+                rotate_full_file(path, old_secret, new_secret, args.dry_run)
+            else:
+                text = path.read_text(encoding="utf-8", errors="ignore")
+                if "$ANSIBLE_VAULT" in text or "!vault" in text:
+                    new_text = rotate_inline_blocks(text, old_secret, new_secret)
+                    if new_text != text:
+                        if args.dry_run:
+                            logger.info(f"[DRY-RUN] Would update: {path}")
+                        else:
+                            safe_write(path, new_text)
+        except Exception as e:
+            logger.error(f"Error processing {path}: {e}")
+
+
+def main():
+    args = parse_args()
+    setup_logging(args.verbose)
+    if args.command == "status":
+        list_status(args)
+    elif args.command == "rotate":
+        rotate_all(args)
+
+
+if __name__ == "__main__":
+    main()
