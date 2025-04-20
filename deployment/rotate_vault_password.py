@@ -2,11 +2,10 @@
 """
 Rotate Ansible vault passwords for files (full vault files or inline vault blocks).
 Features:
-- Atomic writes (no .bak backups)
+- Atomic writes (no .tmp backups)
 - Pathlib usage
 - Structured logging with levels
 - Dry-run mode
-- Progress bars with tqdm
 - Regex-based inline block handling (no ruamel.yaml)
 - Subcommands: rotate (all or specific file), status
 """
@@ -21,7 +20,6 @@ from tempfile import NamedTemporaryFile
 
 from ansible.parsing.vault import VaultEditor, VaultLib, VaultSecret
 from ansible.constants import DEFAULT_VAULT_IDENTITY
-from tqdm import tqdm
 
 # Patterns for excluding files/directories
 EXCLUDED_PATTERNS = [
@@ -51,7 +49,7 @@ def parse_args():
         "--verbose", "-v", action="store_true", help="Verbose (DEBUG) logging"
     )
     parser.add_argument(
-        "--jobs", "-j", type=int, default=1, help="Number of parallel jobs"
+        "--jobs", "-j", type=int, default=1, help="Number of parallel jobs (not used)"
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -131,6 +129,7 @@ def rotate_inline_blocks(text: str, old_secret: VaultSecret, new_secret: VaultSe
     if not text.endswith('\n'):
         text += '\n'
 
+    # Regex to match !vault | blocks including final line without newline
     multiline_regex = re.compile(
         r'(?P<key>^\s*[^\s].*?:\s*)(?P<marker>!vault\s*\|)[\r\n]+'
         r'(?P<content>(?P<indent>\s*)(?:\$ANSIBLE_VAULT[^\r\n]*[\r\n]+)'
@@ -142,17 +141,20 @@ def rotate_inline_blocks(text: str, old_secret: VaultSecret, new_secret: VaultSe
         key = m.group('key')
         indent = m.group('indent')
         raw = m.group('content')
+        # strip indent
         block = ''.join(line[len(indent):] for line in raw.splitlines(True))
         if not block.endswith('\n'):
             block += '\n'
+        # write to temp, rekey
         with NamedTemporaryFile(mode='w+', delete=False) as tmp:
             tmp.write(block)
             tmp.flush()
             tmp_path = tmp.name
         VaultEditor(VaultLib([(DEFAULT_VAULT_IDENTITY, old_secret)])).rekey_file(tmp_path, new_secret)
-        new_block = Path(tmp_path).read_text().splitlines(True)
+        new_block_lines = Path(tmp_path).read_text().splitlines(True)
         Path(tmp_path).unlink()
-        recoded = ''.join(indent + line for line in new_block)
+        # re-indent
+        recoded = ''.join(indent + line for line in new_block_lines)
         return f"{key}!vault |\n{recoded}"
 
     return multiline_regex.sub(repl, text)
@@ -161,9 +163,8 @@ def rotate_inline_blocks(text: str, old_secret: VaultSecret, new_secret: VaultSe
 def rotate_all(args):
     old_secret = VaultSecret(args.old_password.encode())
     new_secret = VaultSecret(args.new_password.encode())
-    files = list(walk_files(Path('.'), getattr(args, 'file', None)))
 
-    for path in tqdm(files, desc="Processing files", unit="file"):
+    for path in walk_files(Path('.'), getattr(args, 'file', None)):
         try:
             if is_full_vault_file(path):
                 rotate_full_file(path, old_secret, new_secret, args.dry_run)
