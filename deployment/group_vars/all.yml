@@ -1,5 +1,5 @@
 # Name of the GitHub project
-project_name: "[[ deploy_your_startup.project_name ]]"
+project_name: "§§deploy_your_startup.project_name§§"
 
 create_load_balancer: false
 
@@ -7,9 +7,9 @@ backend_version: latest
 
 ssh_public_keys:
   - name: "{{ project_name }}_ci_key"
-    key: [[ deploy_your_startup.ci_key ]]
+    key: §§deploy_your_startup.ci_key§§
   - name: "{{ project_name }}_user_key"
-    key: [[ deploy_your_startup.user_key ]]
+    key: §§deploy_your_startup.user_key§§
 
 digital_ocean_token: !vault |
   $ANSIBLE_VAULT;1.1;AES256
