@@ -1,0 +1,20 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment which infrastructure should be deployed"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+
+jobs:
+  deploy-infrastructure:
+    uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.ci_actions_repo_name§§/.github/workflows/deploy-infrastructure.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || inputs.environment }}
+    secrets:
+      VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
