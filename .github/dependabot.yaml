@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # General
+  - package-ecosystem: "github-actions"
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: pip
+    directories:
+      - /backend
+      - /deployment
+    schedule:
+      interval: weekly
+    groups:
+      python-dev-dependencies:
+        dependency-type: development
+      python-prod-dependencies:
+        dependency-type: production

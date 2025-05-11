@@ -1,0 +1,25 @@
+name: Build and Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        default: production
+
+jobs:
+  build-and-deploy:
+    uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.ci_actions_repo_name§§/.github/workflows/build-and-deploy-service.yml@main
+    with:
+      environment: ${{ github.event.inputs.environment || 'production' }}
+      platforms: linux/arm64
+      service: backend
+      run_tests: true
+    secrets:
+      VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
