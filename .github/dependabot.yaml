@@ -22,10 +22,10 @@ updates:
       python-prod-dependencies:
         dependency-type: production
 
-  - package-ecosystem: "docker"
+  - package-ecosystem: docker
     directories:
-      - "backend"
+      - /backend
     schedule:
-      interval: "weekly"
+      interval: weekly
 
 
