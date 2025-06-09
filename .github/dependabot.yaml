@@ -11,6 +11,7 @@ updates:
         dependency-type: development
       python-prod-dependencies:
         dependency-type: production
+        
   - package-ecosystem: uv
     directories:
       - /backend
