@@ -2,7 +2,6 @@ version: 2
 updates:
   - package-ecosystem: pip
     directories:
-      - /backend
       - /deployment
     schedule:
       interval: weekly
