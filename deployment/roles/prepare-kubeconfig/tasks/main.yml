@@ -15,9 +15,6 @@
     mode: '0600'
     force: yes
   become: yes
-  # TODO remove when k3s kuebconfig is back :D
-  when: kubeconfig_source is file
-
 
 - name: Ensure permissions for the kubeconfig file
   file:

@@ -1,32 +1,10 @@
-- name: "apply traefik middleware"
-  k8s:
-    state: present
-    definition: "{{ lookup('template', 'traefik-middleware.yml') }}"
+---
+- name: "Install cert-manager using Helm CLI"
+  ansible.builtin.include_tasks: install_with_helm.yml
+  when: cert_manager_install_method == "helm"
   tags: cert-manager
 
-- name: "Download cert-manager manifest"
-  ansible.builtin.get_url:
-    url: "https://github.com/cert-manager/cert-manager/releases/download/v{{ cert_manager_version }}/cert-manager.yaml"
-    dest: ~/cert-manager.yaml
-    mode: '0664'
-    force: true
-  tags: cert-manager
-
-- name: "Apply cert-manager manifest"
-  kubernetes.core.k8s:
-    state: present
-    src: ~/cert-manager.yaml
-    wait: true
-  tags: cert-manager
-
-- name: "apply digitalocean secret"
-  k8s:
-    state: present
-    definition: "{{ lookup('template', 'digitalocean-secret.yml') }}"
-  tags: cert-manager
-
-- name: "apply cert-manager issuers"
-  k8s:
-    state: present
-    definition: "{{ lookup('template', 'cert-manager-issuers.yml') }}"
+- name: "Install cert-manager using k3s HelmChart resource"
+  ansible.builtin.include_tasks: install_with_k3s_helm.yml
+  when: cert_manager_install_method == "k3s_helm"
   tags: cert-manager

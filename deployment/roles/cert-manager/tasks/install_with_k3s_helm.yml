@@ -1,0 +1,34 @@
+---
+- name: "Download Gateway API standard-install manifest"
+  ansible.builtin.get_url:
+    url: "https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ gateway_api_version }}/standard-install.yaml"
+    dest: "{{ cert_manager_tmp_dir }}/gateway-api-standard-install.yaml"
+    mode: "0644"
+  tags: cert-manager
+
+- name: "Apply Gateway API standard-install manifest"
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ cert_manager_tmp_dir }}/gateway-api-standard-install.yaml"
+    wait: true
+  tags: cert-manager
+
+- name: "Apply cert-manager HelmChart resource for k3s Helm controller"
+  kubernetes.core.k8s:
+    state: present
+    namespace: "kube-system"   # HelmChart resource must live in kube-system
+    definition: "{{ lookup('template', 'cert-manager-helmchart.yaml.j2') }}"
+    wait: true
+  tags: cert-manager
+
+- name: "Apply DigitalOcean secret for DNS-01"
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'digitalocean-secret.yml') }}"
+  tags: cert-manager
+
+- name: "Apply cert-manager issuers"
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'cert-manager-issuers.yml') }}"
+  tags: cert-manager
