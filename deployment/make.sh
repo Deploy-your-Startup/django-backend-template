@@ -7,15 +7,19 @@ fi
 
 # SETUP ANSIBLE - Install Ansible collections only (for CI/CD caching)
 if [ "$1" == "setup_ansible" ]; then
+  if [ ! -f "requirements.yml" ]; then
+    echo "No Ansible collections to install."
+    exit 0
+  fi
   echo "Installing Ansible collections..."
-  ansible-galaxy collection install -r requirements.yml
+  uv run ansible-galaxy collection install -r requirements.yml
   exit 0
 fi
 
 # SETUP - Install all dependencies
 if [ "$1" == "setup" ]; then
   echo "Installing Python dependencies..."
-  pip install -r requirements.txt
+  uv sync
   $0 setup_ansible
   echo "Setup complete!"
   exit 0
@@ -57,8 +61,8 @@ fi
   # Install Ansible collections before running playbook
   $0 setup_ansible
 
-  hcloud_token=$(echo "$vault_password" | ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
-  echo "$vault_password" | HCLOUD_TOKEN=$hcloud_token ansible-playbook playbook.yml --vault-password-file /bin/cat --tags $service --skip-tags infrastructure
+  hcloud_token=$(echo "$vault_password" | uv run ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
+  echo "$vault_password" | HCLOUD_TOKEN=$hcloud_token uv run ansible-playbook playbook.yml --vault-password-file /bin/cat --tags $service --skip-tags infrastructure
 fi
 
 
@@ -94,8 +98,8 @@ fi
   # Install Ansible collections before running playbook
   $0 setup_ansible
 
-  hcloud_token=$(echo "$vault_password" | ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
-  echo "$vault_password" | HCLOUD_TOKEN=$hcloud_token ansible-playbook playbook.yml --vault-password-file /bin/cat --tags infrastructure -l $environment,provision-infrastructure
+  hcloud_token=$(echo "$vault_password" | uv run ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
+  echo "$vault_password" | HCLOUD_TOKEN=$hcloud_token uv run ansible-playbook playbook.yml --vault-password-file /bin/cat --tags infrastructure -l $environment,provision-infrastructure
 fi
 
 
@@ -132,7 +136,7 @@ out="${out:-$HOME/.kube/k3s-$environment.yaml}"
 ssh_user="${ssh_user:-root}"
 
 # Obtain Hetzner API token from Ansible Vault
-hcloud_token=$(echo "$vault_password" | ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
+hcloud_token=$(echo "$vault_password" | uv run ansible-vault view hcloud_token_$environment --vault-password-file /bin/cat)
 if [ -z "$hcloud_token" ]; then
   echo "Could not read hcloud_token for environment '$environment' from Ansible Vault."
   exit 1
@@ -140,7 +144,7 @@ fi
 
 # 1) Resolve master host using dynamic inventory
 if [ -z "$master_host" ]; then
-  master_host=$(HCLOUD_TOKEN="$hcloud_token" ansible-inventory -i "$inventory" --list \
+  master_host=$(HCLOUD_TOKEN="$hcloud_token" uv run ansible-inventory -i "$inventory" --list \
   | jq -r '
       (.k3s_masters.hosts[0]? // .masters.hosts[0]? // .control_plane.hosts[0]?)
       // (
@@ -160,7 +164,7 @@ if [ -z "$master_host" ]; then
 fi
 
 # 2) Resolve master IP from hostvars
-master_ip=$(HCLOUD_TOKEN="$hcloud_token" ansible-inventory -i "$inventory" --host "$master_host" \
+master_ip=$(HCLOUD_TOKEN="$hcloud_token" uv run ansible-inventory -i "$inventory" --host "$master_host" \
   | jq -r '.ansible_host // .public_ipv4 // .public_ip // empty')
 
 if [ -z "$master_ip" ]; then
