@@ -1,0 +1,11 @@
+[project]
+name = "django-backend-template-deployment"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "ansible==11.2.0",
+  "hcloud==2.3.0",
+]
+
+[tool.uv]
+package = false
