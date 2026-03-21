@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-public
+  namespace: default
+  annotations:
+    cert-manager.io/issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-to-https@kubernetescrd,default-redirect-to-base@kubernetescrd
+spec:
+  tls:
+    - hosts:
+{% for domain in [base_domain] + additional_domains %}
+        - "{{ domain }}"
+{% endfor %}
+      secretName: backend-tls
+  rules:
+    - host: "{{ base_domain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+{% for domain in additional_domains %}
+    - host: "{{ domain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+{% endfor %}

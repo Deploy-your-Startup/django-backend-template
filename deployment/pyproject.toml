@@ -1,11 +1,15 @@
 [project]
-name = "django-backend-template-deployment"
+name = "deployment"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-  "ansible==11.2.0",
-  "hcloud==2.3.0",
+  "ansible==13.4.0",
+  "deploy-your-startup-cli",
+  "hcloud==2.17.0",
 ]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+deploy-your-startup-cli = { git = "https://github.com/Deploy-your-Startup/cli.git" }

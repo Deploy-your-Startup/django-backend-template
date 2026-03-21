@@ -1,38 +1,30 @@
 # Deployment
 
-## Setup Documentation
+## Quick Start
 
-### Create pull secrets GitHub for Kubernetes
+```bash
+# Setup shared roles and dependencies
+./make.sh setup_ansible
 
-- set env `CR_PAT` (you can create the token here: https://github.com/settings/tokens)
-- `kubectl create secret docker-registry github-container-registry --namespace=default --docker-server=ghcr.io --docker-username=philipp-lein --docker-password=${CR_PAT} --dry-run=client --output=yaml > docker-secret.yaml`
+# Deploy infrastructure (creates Hetzner servers, K3s, DNS)
+./make.sh infrastructure --environment production --vault_password <pw>
 
-### Create new ssh private and public key
+# Deploy services
+./make.sh deploy --environment production --vault_password <pw>
 
-- `ssh-keygen -t rsa -b 4096 -C ssh_private_key`
+# Get kubeconfig for kubectl access
+./make.sh kubeconfig --environment production --vault_password <pw>
+```
 
-### Update cert-manager
+## Secrets Management
 
-- download cert-manager file from here https://cert-manager.io/docs/installation/#default-static-install
+```bash
+# List vault files
+./make.sh list_vaults
 
+# Update secrets
+./make.sh secrets_update -p <vault_password> --field-random backend_db_password
 
-### HOTFIX FOR actual PROBLEMS 
-`kubectl apply --server-side --force-conflicts -k https://github.com/traefik/traefik-helm-chart/traefik/crds/`
-`kubectl rollout restart deployment traefik -n kube-system`
-
-
-### Things to come:
-#### new loadbalancer modus with hetzner cloud-controller
-install cluster with 
-curl -sfL https://get.k3s.io | sh -s - server \
-	--cluster-init \
-    --disable-cloud-controller \
-    --disable local-storage \
-    --node-name="$(hostname -f)" \
-    --kubelet-arg="cloud-provider=external" 
-
-install hetzner token secret
-install cloud-controller-manager with helm
-helm repo add hcloud https://charts.hetzner.cloud
-helm install hccm hcloud/hcloud-cloud-controller-manager -n kube-system
-follow https://ellie.wtf/notes/hetzner-k3s
+# Rotate vault password
+./make.sh rotate_vault_password --old-password <old> --new-password <new>
+```
