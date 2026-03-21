@@ -1,8 +1,0 @@
-plugin: hcloud
-user: root
-status:
-  - running
-keyed_groups:
-  - key: labels
-    prefix: hcloud
-

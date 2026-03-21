@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-base
+  namespace: default
+spec:
+  redirectRegex:
+    regex: "^https?://({{ additional_domains | join('|') }})/(.*)"
+    replacement: "https://{{ base_domain }}/$2"
+    permanent: true

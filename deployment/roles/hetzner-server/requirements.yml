@@ -1,3 +1,0 @@
-collections:
-  - name: hetzner.hcloud
-    version: 5.2.0

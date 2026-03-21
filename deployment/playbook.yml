@@ -1,8 +1,13 @@
+---
 # PROVISIONING INFRASTRUCTURE
 - hosts: provision-infrastructure
   connection: local
   gather_facts: false
   tasks:
+    - import_role:
+        name: "hetzner-network"
+      tags: infrastructure
+
     - import_role:
         name: "hetzner-server"
       vars:
@@ -18,6 +23,10 @@
       tags: infrastructure
 
     - import_role:
+        name: "hetzner-firewall"
+      tags: infrastructure
+
+    - import_role:
         name: "hetzner-loadbalancer"
       when: create_load_balancer is defined and create_load_balancer
       tags: infrastructure
@@ -29,7 +38,7 @@
         domains: "{{ [base_domain] + additional_domains }}"
       tags: infrastructure
 
-# CHECK INFRASTRUCTURE READY AND PROVISION EVERYTHING WE NEED
+# CHECK INFRASTRUCTURE READY - WAIT FOR SSH ON ALL NODES
 - hosts: hcloud
   gather_facts: false
   tasks:
@@ -41,16 +50,25 @@
       tags: infrastructure
       connection: local
 
+# K3S INSTALLATION - SEQUENTIALLY!
+- hosts: hcloud
+  gather_facts: false
+  serial: 1
+  tasks:
     - import_role:
         name: k3s
       tags: infrastructure,k3s
 
+# POST-K3S SETUP
+- hosts: hcloud
+  gather_facts: false
+  tasks:
     # ONLY RUN ON MASTER NODES
     - name: "prepare kubeconfig for k8s ansible module"
       import_role:
         name: prepare-kubeconfig
       tags: infrastructure
-      when: labels.get("type") == "master"
+      when: hcloud_labels.get("type") == "master"
 
     - name: "install python dependencies"
       import_role:
@@ -89,35 +107,6 @@
         name: postgres
       tags: postgres
 
-    - name: "copy auth-proxy role into deployment"
-      connection: local
-      copy:
-        src: ../auth-proxy/deployment/
-        dest: roles/auth-proxy
-      tags: auth-proxy
-
-    - name: "deploy auth-proxy"
-      include_role:
-        name: auth-proxy
-      tags: auth-proxy
-
-    - name: "deploy redis"
-      import_role:
-        name: redis
-      tags: redis
-
-    - name: "copy frontend role into deployment"
-      connection: local
-      copy:
-        src: ../frontend/deployment/
-        dest: roles/frontend
-      tags: frontend
-
-    - name: "deploy frontend"
-      include_role:
-        name: frontend
-      tags: frontend
-
     - name: "copy backend role into deployment"
       connection: local
       copy:
@@ -129,15 +118,3 @@
       include_role:
         name: backend
       tags: backend
-
-    - name: "copy ai role into deployment"
-      connection: local
-      copy:
-        src: ../ai/deployment/
-        dest: roles/ai
-      tags: ai
-
-    - name: "deploy ai"
-      include_role:
-        name: ai
-      tags: ai

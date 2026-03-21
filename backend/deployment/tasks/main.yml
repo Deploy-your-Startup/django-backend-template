@@ -1,0 +1,35 @@
+- name: "apply additional domains middleware to redirect to base domain"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'traefik-middleware.yml.j2') }}"
+  tags: backend
+
+- name: "apply backend secrets"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'secrets.yml') }}"
+  tags: backend
+
+- name: "apply backend persistent volumes"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'persistent-volumes.yml') }}"
+  tags: backend
+
+- name: "apply backend deployment"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'deployment.yml') }}"
+  tags: backend
+
+- name: "apply backend ingress"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'ingress.yml') }}"
+  tags: backend
+
+- name: "apply backend service"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'service.yml') }}"
+  tags: backend
