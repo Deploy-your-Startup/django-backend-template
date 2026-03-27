@@ -32,7 +32,7 @@
       tags: infrastructure
 
     - import_role:
-        name: "dns"
+        name: "hetzner-dns"
       vars:
         loadbalancer_ip: "{{ load_balancer_result.hcloud_load_balancer.ipv4_address | default(hostvars[project_name + '-master-0']['ansible_host'])}}"
         domains: "{{ [base_domain] + additional_domains }}"
