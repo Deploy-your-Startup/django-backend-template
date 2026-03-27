@@ -21,10 +21,70 @@
     wait: true
   tags: cert-manager
 
-- name: "Apply DigitalOcean secret for DNS-01"
+- name: "Wait for cert-manager namespace to be created"
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: cert-manager
+  register: cert_manager_ns
+  until: cert_manager_ns.resources | length > 0
+  retries: 30
+  delay: 10
+  tags: cert-manager
+
+- name: "Wait for cert-manager deployment to be ready"
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: cert-manager
+    name: cert-manager
+  register: cert_manager_deployment
+  until: >
+    cert_manager_deployment.resources | length > 0 and
+    cert_manager_deployment.resources[0].status.readyReplicas is defined and
+    cert_manager_deployment.resources[0].status.readyReplicas >= 1
+  retries: 30
+  delay: 10
+  tags: cert-manager
+
+- name: "Wait for cert-manager CRDs to be available"
+  kubernetes.core.k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: issuers.cert-manager.io
+  register: issuer_crd
+  until: >
+    issuer_crd.resources | length > 0 and
+    issuer_crd.resources[0].status.conditions is defined and
+    issuer_crd.resources[0].status.conditions | selectattr('type', 'equalto', 'Established') | selectattr('status', 'equalto', 'True') | list | length > 0
+  retries: 30
+  delay: 10
+  tags: cert-manager
+
+- name: "Apply Hetzner webhook HelmChart resource"
   kubernetes.core.k8s:
     state: present
-    definition: "{{ lookup('template', 'digitalocean-secret.yml') }}"
+    namespace: "kube-system"
+    definition: "{{ lookup('template', 'webhook-helmchart.yaml.j2') }}"
+    wait: true
+  tags: cert-manager
+
+- name: "Wait for Hetzner webhook deployment to be ready"
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: cert-manager
+    name: cert-manager-webhook-hetzner
+  register: webhook_deployment
+  until: >
+    webhook_deployment.resources | length > 0 and
+    webhook_deployment.resources[0].status.readyReplicas is defined and
+    webhook_deployment.resources[0].status.readyReplicas >= 1
+  retries: 30
+  delay: 10
+  tags: cert-manager
+
+- name: "Apply Hetzner secret for DNS-01"
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'hetzner-secret.yml') }}"
   tags: cert-manager
 
 - name: "Apply cert-manager issuers"
@@ -32,3 +92,90 @@
     state: present
     definition: "{{ lookup('template', 'cert-manager-issuers.yml') }}"
   tags: cert-manager
+
+- name: "Apply Traefik redirect-to-https middleware"
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'traefik-middleware.yml') }}"
+  tags: cert-manager
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/tasks/main.yml
+---
+- name: "Install cert-manager using Helm CLI"
+  ansible.builtin.include_tasks: install_with_helm.yml
+  when: cert_manager_install_method == "helm"
+  tags: cert-manager
+
+- name: "Install cert-manager using k3s HelmChart resource"
+  ansible.builtin.include_tasks: install_with_k3s_helm.yml
+  when: cert_manager_install_method == "k3s_helm"
+  tags: cert-manager
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/defaults/main.yml
+---
+# Default installation method: "helm" or "k3s_helm"
+cert_manager_install_method: "k3s_helm"
+
+cert_manager_chart_version: "v1.20.0"
+
+cert_manager_namespace: "cert-manager"
+
+gateway_api_version: "v1.0.0"
+
+cert_manager_tmp_dir: "/tmp"
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/templates/hetzner-secret.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hetzner
+  namespace: cert-manager
+stringData:
+  token: "{{ lookup('env', 'HCLOUD_TOKEN') }}"
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/templates/cert-manager-issuers.yml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+  namespace: default
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: hallo@philipp-lein.de
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - dns01:
+        webhook:
+          groupName: acme.hetzner.com
+          solverName: hetzner
+          config:
+            tokenSecretKeyRef:
+              name: hetzner
+              key: token
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/templates/webhook-helmchart.yaml.j2
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager-webhook-hetzner
+  namespace: kube-system
+spec:
+  repo: "https://charts.hetzner.cloud"
+  chart: "cert-manager-webhook-hetzner"
+  targetNamespace: "{{ cert_manager_namespace }}"
+
+*** Add File: /Users/philipplein/Projects/startup-factory/projects/tooling/django-backend-template/deployment/roles/cert-manager/templates/traefik-middleware.yml
+---
+# Redirect to https
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: default
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
