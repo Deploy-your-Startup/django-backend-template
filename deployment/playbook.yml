@@ -111,7 +111,7 @@
       connection: local
       copy:
         src: ../backend/deployment/
-        dest: roles/backend
+        dest: ./roles/backend
       tags: backend
 
     - name: "deploy backend"
