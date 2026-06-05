@@ -18,7 +18,7 @@ jobs:
     uses: §§deploy_your_startup.github_username§§/deploy-your-startup/.github/workflows/build-and-deploy-service.yml@main
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
-      platforms: linux/arm64
+      platforms: linux/amd64
       service: backend
       run_tests: true
     secrets:
