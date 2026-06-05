@@ -30,6 +30,10 @@ if [ "$1" == "makemigrations" ]; then
     uv run python manage.py makemigrations --settings project.settings
 fi
 
+if [ "$1" == "dumpdata" ]; then
+    uv run python manage.py dumpdata --natural-foreign --natural-primary --settings project.settings
+fi
+
 if [ "$1" == "test" ]; then
     echo "Running tests"
     uv run python manage.py test --settings project.settings
@@ -39,4 +43,70 @@ if [ "$1" == "format" ]; then
     echo "Format code and run ruff checks"
     uvx ruff format
     uvx ruff check --fix
+fi
+
+if [ "$1" == "restore_local" ]; then
+    # Restore latest production backup (DB + media) into the local dev DB.
+    # Prerequisite: ./make.sh run_dev was started at least once
+    # (docker_database_url spins up the local postgres container on settings import).
+    shift
+    while [ $# -gt 0 ]; do
+        if [[ $1 == --* ]]; then
+            if [[ "$1" == *=* ]]; then
+                v="${1/--/}"
+                declare "${v%%=*}"="${v#*=}"
+            else
+                v="${1/--/}"
+                declare "$v"="$2"
+                shift
+            fi
+        fi
+        shift
+    done
+
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    project_slug="§§deploy_your_startup.project_name§§"
+    project_db="${project_slug//-/_}"
+    backup_dir="${backup_dir:-$HOME/Backups/$project_slug}"
+    clean="${clean:-true}"
+    container_name="${container:-$project_db}"
+    db_name="${db:-$project_db}"
+    db_user="${user:-admin}"
+    target_dir="${target:-$script_dir/media}"
+
+    if [ -z "${db_file:-}" ]; then
+        db_file=$(ls -1t "$backup_dir"/*-db-*.sql.gz "$backup_dir"/*/*-db-*.sql.gz 2>/dev/null | sed -n '1p')
+    fi
+    if [ -z "${media_file:-}" ]; then
+        media_file=$(ls -1t "$backup_dir"/*-media-*.tar.gz "$backup_dir"/*/*-media-*.tar.gz 2>/dev/null | sed -n '1p')
+    fi
+    if [ -z "${db_file:-}" ] || [ ! -f "$db_file" ]; then
+        echo "No database dump found in $backup_dir"
+        echo "Run a backup first: cd ../deployment && ./make.sh backup --environment production"
+        exit 1
+    fi
+    if [ -z "${media_file:-}" ] || [ ! -f "$media_file" ]; then
+        echo "No media archive found in $backup_dir"
+        exit 1
+    fi
+    if ! docker ps --format '{{.Names}}' | grep -q "^${container_name}$"; then
+        echo "Container '$container_name' not running. Run ./make.sh run_dev first."
+        exit 1
+    fi
+
+    echo "Restoring database from: $(basename "$db_file")"
+    if [ "$clean" == "true" ]; then
+        docker exec "$container_name" psql -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1 \
+            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION \"$db_user\"; GRANT ALL ON SCHEMA public TO \"$db_user\";"
+    fi
+    gunzip -c "$db_file" | docker exec -i "$container_name" psql -U "$db_user" -d "$db_name" -v ON_ERROR_STOP=1
+
+    echo "Restoring media from: $(basename "$media_file")"
+    if [ "$clean" == "true" ]; then
+        rm -rf "$target_dir"
+    fi
+    mkdir -p "$target_dir"
+    tar -xzf "$media_file" -C "$target_dir" --strip-components=1
+
+    echo "Local restore completed."
 fi
