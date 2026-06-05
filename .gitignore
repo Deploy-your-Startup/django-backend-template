@@ -3,5 +3,4 @@
 .DS_Store
 deployment/.shared-roles/
 deployment/.venv/
-deployment/uv.lock
 deployment/roles/
