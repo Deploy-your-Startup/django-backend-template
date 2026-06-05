@@ -25,9 +25,6 @@ case "$action" in
   infrastructure)
     uv run --project "$script_dir" startup ansible infrastructure --working-directory "$script_dir" "$@"
     ;;
-  kubeconfig)
-    uv run --project "$script_dir" startup ansible kubeconfig --working-directory "$script_dir" "$@"
-    ;;
   backup)
     uv run --project "$script_dir" startup ansible backup --working-directory "$script_dir" "$@"
     ;;
