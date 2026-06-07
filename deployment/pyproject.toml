@@ -3,13 +3,19 @@ name = "deployment"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-  "ansible==13.6.0",
+  # ansible + hcloud come transitively from the CLI (pinned there), so we don't
+  # duplicate their versions here.
   "deploy-your-startup-cli",
-  "hcloud==2.19.0",
 ]
 
 [tool.uv]
 package = false
+# The CLI keeps Playwright as a CORE dependency so a direct `uv tool install`
+# gives the full feature set (bootstrap + hetzner browser flows). A deployment
+# only ever runs `startup ansible`, so we prune Playwright here: the never-true
+# marker keeps it resolvable in the lock but stops `uv sync` from pulling its
+# ~130 MB bundled node driver into CI pipelines.
+override-dependencies = ["playwright; sys_platform == 'never'"]
 
 [tool.uv.sources]
 deploy-your-startup-cli = { git = "https://github.com/Deploy-your-Startup/cli.git" }
