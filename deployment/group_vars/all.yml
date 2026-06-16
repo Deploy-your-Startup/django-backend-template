@@ -1,6 +1,18 @@
 # Name of the GitHub project
 project_name: "§§deploy_your_startup.project_name§§"
 
+# Cloud provider to provision on: "hetzner" or "ovh". Selects the *-network /
+# *-server / *-firewall / *-loadbalancer / *-dns roles in playbook.yml and the
+# dynamic inventory the CLI passes. `startup bootstrap --cloud-provider` writes
+# this; defaults to hetzner for backwards compatibility.
+cloud_provider: hetzner
+
+# OVH (OpenStack) sizing — only used when cloud_provider == "ovh". Auth comes
+# from clouds.yaml (cloud: ovh) + OVH API keys in the vault, not from here.
+# ovh_region: GRA11
+# ovh_flavor: d2-4
+# ovh_image: "Ubuntu 24.04"
+
 create_load_balancer: false
 
 backend_version: latest
