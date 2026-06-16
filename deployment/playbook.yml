@@ -1,45 +1,103 @@
 ---
-# PROVISIONING INFRASTRUCTURE
+# PROVISIONING INFRASTRUCTURE — provider selected by `cloud_provider` (hetzner|ovh)
+#
+# The two providers need a different role order:
+#   hetzner: network -> servers -> firewall   (firewall is applied to the
+#            already-created servers, looked up by name)
+#   ovh:     network -> firewall -> servers    (servers attach the pre-created
+#            OpenStack security group at creation time)
+#
+# Both paths label/tag nodes the same way (type=master|worker, ingress=true) so
+# the dynamic inventory yields the provider-neutral groups (cluster,
+# cluster_type_master/_worker) the plays below target.
 - hosts: provision-infrastructure
   connection: local
   gather_facts: false
   tasks:
-    - import_role:
-        name: "hetzner-network"
+    # ---------------------------------------------------------------- Hetzner
+    - name: "Provision Hetzner Cloud infrastructure"
+      when: cloud_provider == "hetzner"
       tags: infrastructure
+      block:
+        - import_role:
+            name: "hetzner-network"
 
-    - import_role:
-        name: "hetzner-server"
+        - import_role:
+            name: "hetzner-server"
+          vars:
+            node_count: "{{ master_count }}"
+            node_type: master
+
+        - import_role:
+            name: "hetzner-server"
+          vars:
+            node_count: "{{ worker_count }}"
+            node_type: worker
+
+        - import_role:
+            name: "hetzner-firewall"
+
+        - import_role:
+            name: "hetzner-loadbalancer"
+          when: create_load_balancer is defined and create_load_balancer
+
+        - name: "Resolve cluster ingress IP (load balancer, else master-0)"
+          set_fact:
+            cluster_ingress_ip: >-
+              {{ load_balancer_result.hcloud_load_balancer.ipv4_address
+                 if (create_load_balancer | default(false) | bool)
+                 else hostvars[project_name + '-master-0']['ansible_host'] }}
+
+    # ------------------------------------------------------------ OVH (OpenStack)
+    - name: "Provision OVH Public Cloud infrastructure"
+      when: cloud_provider == "ovh"
+      tags: infrastructure
+      block:
+        - import_role:
+            name: "ovh-network"
+
+        - import_role:
+            name: "ovh-firewall"
+
+        - import_role:
+            name: "ovh-server"
+          vars:
+            node_count: "{{ master_count }}"
+            node_type: master
+
+        - import_role:
+            name: "ovh-server"
+          vars:
+            node_count: "{{ worker_count }}"
+            node_type: worker
+
+        - import_role:
+            name: "ovh-loadbalancer"
+          when: create_load_balancer is defined and create_load_balancer
+
+        - name: "Resolve cluster ingress IP (load balancer, else master-0)"
+          set_fact:
+            cluster_ingress_ip: >-
+              {{ ovh_lb.loadbalancer.vip_address
+                 if (create_load_balancer | default(false) | bool)
+                 else hostvars[project_name + '-master-0']['ansible_host'] }}
+
+    # ------------------------------------------------------------------- DNS
+    # Same interface for both providers (loadbalancer_ip + domains); the role is
+    # selected by cloud_provider. include_role (dynamic name) needs apply: to
+    # push the infrastructure tag onto the role's tasks.
+    - name: "Configure DNS"
+      include_role:
+        name: "{{ cloud_provider }}-dns"
+        apply:
+          tags: infrastructure
       vars:
-        node_count: "{{ master_count }}"
-        node_type: master
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-server"
-      vars:
-        node_count: "{{ worker_count }}"
-        node_type: worker
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-firewall"
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-loadbalancer"
-      when: create_load_balancer is defined and create_load_balancer
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-dns"
-      vars:
-        loadbalancer_ip: "{{ load_balancer_result.hcloud_load_balancer.ipv4_address | default(hostvars[project_name + '-master-0']['ansible_host'])}}"
+        loadbalancer_ip: "{{ cluster_ingress_ip | default(hostvars[project_name + '-master-0']['ansible_host']) }}"
         domains: "{{ [base_domain] + additional_domains }}"
       tags: infrastructure
 
 # CHECK INFRASTRUCTURE READY - WAIT FOR SSH ON ALL NODES
-- hosts: hcloud
+- hosts: cluster
   gather_facts: false
   tasks:
     - name: "Wait for SSH to come up"
@@ -51,7 +109,10 @@
       connection: local
 
 # K3S INSTALLATION - SEQUENTIALLY!
-- hosts: hcloud
+# become: true so plays work for the OVH `ubuntu` login user (no-op as root on
+# Hetzner).
+- hosts: cluster
+  become: true
   gather_facts: false
   serial: 1
   tasks:
@@ -60,7 +121,8 @@
       tags: infrastructure,k3s
 
 # POST-K3S SETUP
-- hosts: hcloud
+- hosts: cluster
+  become: true
   gather_facts: false
   tasks:
     # ONLY RUN ON MASTER NODES
@@ -68,7 +130,7 @@
       import_role:
         name: prepare-kubeconfig
       tags: infrastructure
-      when: hcloud_labels.get("type") == "master"
+      when: node_type == "master"
 
     - name: "install python dependencies"
       import_role:
@@ -82,14 +144,18 @@
       tags: infrastructure
       run_once: true
 
+    # Hetzner CSI for persistent volumes. OVH/OpenStack uses a different storage
+    # provider (Cinder CSI) — tracked as a follow-up; skipped for now.
     - name: "deploy hetzner-csi-provider"
       import_role:
         name: hetzner-csi-provider
+      when: cloud_provider == "hetzner"
       tags: infrastructure
       run_once: true
 
 # DEPLOYMENT OF SERVICES
-- hosts: hcloud_type_master
+- hosts: cluster_type_master
+  become: true
   run_once: true
   tasks:
     - name: "deploy docker-secrets"
