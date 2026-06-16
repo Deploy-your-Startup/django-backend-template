@@ -82,12 +82,6 @@
       tags: infrastructure
       run_once: true
 
-    - name: "deploy hetzner-csi-provider"
-      import_role:
-        name: hetzner-csi-provider
-      tags: infrastructure
-      run_once: true
-
 # DEPLOYMENT OF SERVICES
 - hosts: hcloud_type_master
   run_once: true
