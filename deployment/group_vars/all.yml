@@ -13,6 +13,10 @@ cloud_provider: hetzner
 # ovh_flavor: d2-4
 # ovh_image: "Ubuntu 24.04"
 
+# Whether provisioning manages DNS records. Set false to point the domain at the
+# cloud manually (e.g. OVH apex while DNS automation is not yet wired up).
+manage_dns: true
+
 create_load_balancer: false
 
 backend_version: latest
