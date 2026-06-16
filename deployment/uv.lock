@@ -261,8 +261,8 @@ wheels = [
 
 [[package]]
 name = "deploy-your-startup-cli"
-version = "0.1.dev86+gca4121391"
-source = { git = "https://github.com/Deploy-your-Startup/cli.git#ca4121391c8218013b3dd02f64ae23dea8af1000" }
+version = "0.1.dev94+ge380d5ecd"
+source = { git = "https://github.com/Deploy-your-Startup/cli.git#e380d5ecde218ebd505cde0d9c5614ca430e633e" }
 dependencies = [
     { name = "ansible" },
     { name = "click" },
