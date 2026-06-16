@@ -82,15 +82,6 @@
       tags: infrastructure
       run_once: true
 
-    # Hetzner block storage (CSI). Skipped on bring-your-own-server: a single
-    # VPS uses k3s' built-in local-path / hostPath storage instead.
-    - name: "deploy hetzner-csi-provider"
-      import_role:
-        name: hetzner-csi-provider
-      tags: infrastructure
-      run_once: true
-      when: provider | default('hetzner') == 'hetzner'
-
 # DEPLOYMENT OF SERVICES
 - hosts: hcloud_type_master
   run_once: true
