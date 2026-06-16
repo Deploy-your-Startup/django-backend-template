@@ -1,42 +1,8 @@
 ---
-# PROVISIONING INFRASTRUCTURE
-- hosts: provision-infrastructure
-  connection: local
-  gather_facts: false
-  tasks:
-    - import_role:
-        name: "hetzner-network"
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-server"
-      vars:
-        node_count: "{{ master_count }}"
-        node_type: master
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-server"
-      vars:
-        node_count: "{{ worker_count }}"
-        node_type: worker
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-firewall"
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-loadbalancer"
-      when: create_load_balancer is defined and create_load_balancer
-      tags: infrastructure
-
-    - import_role:
-        name: "hetzner-dns"
-      vars:
-        loadbalancer_ip: "{{ load_balancer_result.hcloud_load_balancer.ipv4_address | default(hostvars[project_name + '-master-0']['ansible_host'])}}"
-        domains: "{{ [base_domain] + additional_domains }}"
-      tags: infrastructure
+# PROVISIONING INFRASTRUCTURE is handled by OpenTofu (tofu/), run by the
+# `startup ansible infrastructure` command before this playbook. It provisions
+# network, servers, firewall, load balancer and DNS, and labels nodes with
+# ingress=true / type=<role> so the dynamic inventory and the plays below match.
 
 # CHECK INFRASTRUCTURE READY - WAIT FOR SSH ON ALL NODES
 - hosts: hcloud
