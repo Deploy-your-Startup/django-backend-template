@@ -109,9 +109,10 @@ DATABASES = {
 }
 
 sentry_logging = LoggingIntegration(level=logging.INFO, event_level=logging.ERROR)
-if not DEBUG:
+sentry_dsn = os.getenv("SENTRY_DSN", "")
+if not DEBUG and sentry_dsn.startswith(("http://", "https://")):
     sentry_sdk.init(
-        dsn=os.getenv("SENTRY_DSN"),
+        dsn=sentry_dsn,
         environment=ENVIRONMENT,
         integrations=[sentry_logging, DjangoIntegration()],
     )
