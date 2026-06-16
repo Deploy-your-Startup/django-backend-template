@@ -3,6 +3,12 @@ env: production
 base_domain: §§deploy_your_startup.base_domain§§
 additional_domains: §§deploy_your_startup.additional_domains§§
 
+# Where OpenTofu keeps this environment's remote state (S3-compatible object
+# storage at the same provider as the infra). Defaults to hetzner; set to `ovh`
+# per environment once OVH is wired. One-time setup: `startup tofu state-setup`.
+# tofu_state_provider: hetzner
+# tofu_state_bucket: startup-tfstate
+
 # Server
 k3s_token: !vault |
   $ANSIBLE_VAULT;1.1;AES256
