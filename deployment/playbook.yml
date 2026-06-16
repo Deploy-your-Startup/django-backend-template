@@ -94,6 +94,7 @@
       vars:
         loadbalancer_ip: "{{ cluster_ingress_ip | default(hostvars[project_name + '-master-0']['ansible_host']) }}"
         domains: "{{ [base_domain] + additional_domains }}"
+      when: manage_dns | default(true) | bool
       tags: infrastructure
 
 # CHECK INFRASTRUCTURE READY - WAIT FOR SSH ON ALL NODES
