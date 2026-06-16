@@ -1,10 +1,6 @@
 # Name of the GitHub project
 project_name: "§§deploy_your_startup.project_name§§"
 
-# Infrastructure provider: "hetzner" (provision VMs via the Hetzner API) or
-# "byos" (bring your own server — deploy onto an existing VPS reached via SSH).
-provider: §§deploy_your_startup.provider§§
-
 create_load_balancer: false
 
 backend_version: latest
