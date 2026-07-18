@@ -20,7 +20,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.0,<5",
-    "docker>=7.1.0,<8",
+    "docker>=7.2.0,<8",
     "httpx>=0.28.1,<0.29",
     "pytest>=9.1.1,<10",
     "factory-boy>=3.3.3,<4",
