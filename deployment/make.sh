@@ -25,6 +25,9 @@ case "$action" in
   infrastructure)
     uv run --project "$script_dir" startup ansible infrastructure --working-directory "$script_dir" "$@"
     ;;
+  k3s_upgrade)
+    uv run --project "$script_dir" startup ansible k3s-upgrade --working-directory "$script_dir" "$@"
+    ;;
   backup)
     uv run --project "$script_dir" startup ansible backup --working-directory "$script_dir" "$@"
     ;;
