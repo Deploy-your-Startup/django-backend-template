@@ -20,6 +20,9 @@
 
 # Upgrade k3s: control plane first, then workers, one node at a time
 ./make.sh k3s_upgrade --environment production --vault_password <pw>
+
+# Upgrade the Ubuntu release: workers first, control plane last
+./make.sh os_upgrade --environment production --vault_password <pw>
 ```
 
 `infrastructure` never changes the k3s version on a node that already has k3s
@@ -27,6 +30,18 @@ installed — it only reports the drift. `k3s_upgrade` is what actually moves th
 cluster to the `k3s_version` pinned in the shared k3s role. Back up first, and
 step only one minor version at a time (1.35 → 1.36 → 1.37, never straight to
 1.37).
+
+`os_upgrade` is the OS equivalent, and the one command here that cannot be
+undone: `do-release-upgrade` replaces kernel, libc and systemd under a running
+containerd, and the only way back is a snapshot restore. Snapshot the servers
+first. On a single-node cluster it refuses to run unless you pass
+`--allow-single-node`, because there is nowhere to drain to and the cluster is
+down for the whole 15-40 minutes. Afterwards, bump `hetzner_os_image` in
+`group_vars/all.yml` — the upgrade moves existing nodes, that pin decides what
+new ones get, and nothing keeps the two in step.
+
+`update_vms` is the routine sibling of both: it moves packages *within* a
+release, is idempotent, and is safe to run any time.
 
 `ci_ssh_key` and `hcloud_token_production` are generated during bootstrap,
 stored as vaulted files in `deployment/`, and rotated to the project-specific
