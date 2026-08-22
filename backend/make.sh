@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Fail on the first failing command. Without this the script returns the exit
+# code of the *last* line only, so a failing `ruff check` would be masked by a
+# passing `ty check` and the CI gate would go green on a lint error.
+set -e
+
 if [ "$1" == "setup_local" ]; then
     echo "Install dependencies you need to run this project"
     echo "Install uv"
@@ -40,9 +45,19 @@ if [ "$1" == "test" ]; then
 fi
 
 if [ "$1" == "format" ]; then
-    echo "Format code and run ruff checks"
-    uvx ruff format
-    uvx ruff check --fix
+    echo "Formatting code and fixing what can be fixed..."
+    # `uv run`, not `uvx`: uvx downloads the newest ruff on every invocation,
+    # so two developers could lint against different rule sets. This uses the
+    # version pinned in pyproject.toml.
+    uv run --group dev ruff format
+    uv run --group dev ruff check --fix
+fi
+
+if [ "$1" == "lint" ]; then
+    echo "Checking formatting, lint and types (no changes) — same as CI..."
+    uv run --group dev ruff format --check
+    uv run --group dev ruff check
+    uv run --group dev ty check
 fi
 
 if [ "$1" == "restore_local" ]; then

@@ -36,7 +36,10 @@ def start_db_and_get_url(
         container.reload()
         if container.status == "exited":
             container.start()
-    except Exception:
+    # Broad on purpose: any failure to look up the container (missing, or the
+    # daemon answering with an API error) means we fall through to creating a
+    # fresh one, which is the desired outcome either way.
+    except Exception:  # noqa: BLE001
         print(f"Can't get container with name {db_name}, creating new one...")
         container = client.containers.run(
             image="postgres:17",
@@ -75,7 +78,9 @@ def start_db_and_get_url(
                 port=port,
             ):
                 break
-        except Exception:
+        # Postgres is still booting; every failure mode here is "not ready
+        # yet", so retry silently until the loop's own timeout gives up.
+        except Exception:  # noqa: BLE001, S110
             pass
 
     sys.stdout.write("\n")
