@@ -1,6 +1,13 @@
 name: Build and Deploy Backend
 
 on:
+  # PRs run build + test + lint. Every deploy step in the shared workflow is
+  # guarded by `github.event_name != 'pull_request'` and the image is built but
+  # not pushed, so a PR run checks without deploying. Without this trigger the
+  # gate would only run after the merge, which cannot block anything.
+  pull_request:
+    paths:
+      - 'backend/**'
   push:
     branches:
       - main
@@ -21,5 +28,7 @@ jobs:
       platforms: linux/amd64
       service: backend
       run_tests: true
+      # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
+      run_lint: true
     secrets:
       VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
