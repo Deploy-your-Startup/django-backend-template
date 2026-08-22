@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 import dj_database_url
 import sentry_sdk
@@ -13,7 +14,7 @@ PROJECT_NAME = "§§deploy_your_startup.project_name§§"
 
 SECRET_KEY = "django-insecure-change-me-in-production"
 
-DEBUG = False if os.getenv("PRODUCTION") else True
+DEBUG = not os.getenv("PRODUCTION")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
 
@@ -73,7 +74,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "project.urls"
 
-TEMPLATES = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
@@ -118,7 +119,9 @@ if not DEBUG and sentry_dsn.startswith(("http://", "https://")):
     )
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},

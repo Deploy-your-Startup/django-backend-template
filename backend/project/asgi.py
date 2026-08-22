@@ -38,7 +38,10 @@ def get_application() -> FastAPI:
             name="media",
         )
 
-    app.mount("/", get_asgi_application())
+    # django-stubs types ASGIHandler.__call__ slightly differently from
+    # Starlette's ASGIApp protocol, so the two stub sets do not line up. The
+    # handler is a valid ASGI app at runtime; this is a stubs mismatch only.
+    app.mount("/", get_asgi_application())  # ty: ignore[invalid-argument-type]
 
     return app
 
