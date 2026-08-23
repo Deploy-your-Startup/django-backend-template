@@ -1,0 +1,11 @@
+[tasks."backend:dev"]
+dir = "backend"
+run = "./make.sh run_dev"
+
+[tasks."backend:lint"]
+dir = "backend"
+run = "./make.sh lint"
+
+[tasks."backend:test"]
+dir = "backend"
+run = "./make.sh test"
