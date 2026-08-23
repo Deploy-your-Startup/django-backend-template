@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-and-deploy:
-    uses: Deploy-your-Startup/deploy-your-startup/.github/workflows/build-and-deploy-service.yml@main
+    uses: Deploy-your-Startup/deploy-template/.github/workflows/build-and-deploy-service.yml@main
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
       platforms: linux/amd64
