@@ -18,7 +18,7 @@ on:
 
 jobs:
   deploy:
-    uses: Deploy-your-Startup/deploy-your-startup/.github/workflows/deploy.yml@main
+    uses: Deploy-your-Startup/deploy-template/.github/workflows/deploy.yml@main
     with:
       environment: ${{ github.event.inputs.environment || inputs.environment }}
     secrets:
