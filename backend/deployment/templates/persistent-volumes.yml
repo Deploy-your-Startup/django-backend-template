@@ -6,12 +6,21 @@ metadata:
   labels:
     app: backend
     type: local
+    # Identifies the owning project so the namespace guard can tell this volume
+    # apart from another startup's media on a shared cluster.
+    startup.deploy/project: "{{ project_name }}"
 spec:
   storageClassName: local-path
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
+  # Bind this volume to one specific claim. Without it every project's volume is
+  # an equally good match for every project's claim - same storage class, same
+  # access mode, same size - and a claim can bind a foreign project's media.
+  claimRef:
+    namespace: "{{ k8s_namespace | default('default') }}"
+    name: backend-media-pvc
   hostPath:
     path: "{{ '/srv/backend/media' if (k8s_namespace | default('default')) == 'default' else '/srv/' ~ k8s_namespace ~ '/backend/media' }}"
 ---
