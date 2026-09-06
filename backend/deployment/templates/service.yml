@@ -3,7 +3,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: backend
-  namespace: default
+  namespace: "{{ k8s_namespace | default('default') }}"
 spec:
   selector:
     app: backend

@@ -86,6 +86,11 @@
 - hosts: hcloud_type_master
   run_once: true
   tasks:
+    - name: "create project namespace"
+      import_role:
+        name: "project-namespace"
+      tags: always
+
     - name: "deploy docker-secrets"
       import_role:
         name: docker-secrets

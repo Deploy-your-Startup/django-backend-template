@@ -2,8 +2,8 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: backend-media-pv
-  namespace: default
+  name: "{{ 'backend-media-pv' if (k8s_namespace | default('default')) == 'default' else k8s_namespace ~ '-backend-media-pv' }}"
+  namespace: "{{ k8s_namespace | default('default') }}"
   labels:
     app: backend
     type: local
@@ -14,16 +14,19 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/srv/backend/media"
+    path: "{{ '/srv/backend/media' if (k8s_namespace | default('default')) == 'default' else '/srv/' ~ k8s_namespace ~ '/backend/media' }}"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: backend-media-pvc
-  namespace: default
+  namespace: "{{ k8s_namespace | default('default') }}"
   labels:
     app: backend
 spec:
+{% if (k8s_namespace | default('default')) != 'default' %}
+  volumeName: "{{ k8s_namespace }}-backend-media-pv"
+{% endif %}
   storageClassName: local-path
   accessModes:
     - ReadWriteOnce
