@@ -3,7 +3,6 @@ kind: PersistentVolume
 apiVersion: v1
 metadata:
   name: "{{ 'backend-media-pv' if (k8s_namespace | default('default')) == 'default' else k8s_namespace ~ '-backend-media-pv' }}"
-  namespace: "{{ k8s_namespace | default('default') }}"
   labels:
     app: backend
     type: local
