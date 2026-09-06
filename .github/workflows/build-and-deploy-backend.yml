@@ -25,7 +25,7 @@ jobs:
     uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.deploy_repo_name§§/.github/workflows/build-and-deploy-service.yml@main
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
-      platforms: linux/amd64
+      platforms: linux/amd64,linux/arm64
       service: backend
       run_tests: true
       # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
