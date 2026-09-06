@@ -2,7 +2,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: redirect-to-base
-  namespace: default
+  namespace: "{{ k8s_namespace | default('default') }}"
 spec:
   redirectRegex:
     regex: "^https?://({{ additional_domains | join('|') }})/(.*)"
