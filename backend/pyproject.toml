@@ -12,9 +12,9 @@ dependencies = [
     "uvicorn[standard]>=0.52.4,<0.53",
     "fastapi>=0.141.1,<0.142",
     "pillow>=12.3.0,<13",
-    "django>=6.1",
+    "django>=6.1.1",
     "django-bootstrap5>=26.3",
-    "psycopg[binary]>=3.3.4",
+    "psycopg[binary]>=3.3.5",
 ]
 
 [dependency-groups]
