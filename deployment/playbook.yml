@@ -31,11 +31,14 @@
       when: create_load_balancer is defined and create_load_balancer
       tags: infrastructure
 
+    # Private network mode points DNS at the tailnet instead — see the TAILNET
+    # play below; no node has a tailnet address yet at this point.
     - import_role:
         name: "hetzner-dns"
       vars:
         loadbalancer_ip: "{{ load_balancer_result.hcloud_load_balancer.ipv4_address | default(hostvars[project_name + '-master-0']['ansible_host'])}}"
         domains: "{{ [base_domain] + additional_domains }}"
+      when: (network_mode | default('public')) != 'private'
       tags: infrastructure
 
 # CHECK INFRASTRUCTURE READY - WAIT FOR SSH ON ALL NODES
@@ -52,8 +55,7 @@
 
 # TAILNET - private network mode only; a no-op for public projects.
 # Joins nodes that were not created on the tailnet, then points DNS at the
-# master's tailnet address — the provisioning play above cannot, because no node
-# has one yet when it runs.
+# master's tailnet address instead of the public IP the provisioning play uses.
 - hosts: hcloud
   gather_facts: false
   tasks:
