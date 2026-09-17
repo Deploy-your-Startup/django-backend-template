@@ -7,6 +7,11 @@ k8s_namespace: "§§deploy_your_startup.k8s_namespace§§"
 
 create_load_balancer: false
 
+# "private" takes the cluster off the internet: only devices on your tailnet
+# reach the site, SSH and the Kubernetes API. Needs cert_manager_solver: dns01
+# and the Tailscale secrets — see "Private Network Mode" in deploy-template.
+network_mode: public
+
 backend_version: latest
 
 ssh_public_keys:
