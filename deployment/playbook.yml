@@ -50,6 +50,31 @@
       tags: infrastructure
       connection: local
 
+# TAILNET - private network mode only; a no-op for public projects.
+# Joins nodes that were not created on the tailnet, then points DNS at the
+# master's tailnet address — the provisioning play above cannot, because no node
+# has one yet when it runs.
+- hosts: hcloud
+  gather_facts: false
+  tasks:
+    - import_role:
+        name: tailscale
+      tags: infrastructure,tailscale
+
+    - name: "Point DNS at the tailnet"
+      include_role:
+        name: hetzner-dns
+        apply:
+          delegate_to: localhost
+          tags: infrastructure
+      vars:
+        loadbalancer_ip: "{{ tailscale_ipv4 }}"
+        domains: "{{ [base_domain] + additional_domains }}"
+      when:
+        - (network_mode | default('public')) == 'private'
+        - inventory_hostname == project_name + '-master-0'
+      tags: infrastructure
+
 # K3S INSTALLATION - SEQUENTIALLY!
 - hosts: hcloud
   gather_facts: false
