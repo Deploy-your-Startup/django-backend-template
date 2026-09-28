@@ -31,6 +31,9 @@ case "$action" in
   k3s_upgrade)
     uv run --project "$script_dir" startup ansible k3s-upgrade --working-directory "$script_dir" "$@"
     ;;
+  os_upgrade)
+    uv run --project "$script_dir" startup ansible os-upgrade --working-directory "$script_dir" "$@"
+    ;;
   kubeconfig)
     uv run --project "$script_dir" startup ansible kubeconfig --working-directory "$script_dir" "$@"
     ;;
