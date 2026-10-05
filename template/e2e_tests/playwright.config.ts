@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
+import { basename, resolve } from "node:path";
 
 const port = Number(process.env.E2E_APP_PORT || 8001);
 const url = `http://127.0.0.1:${port}`;
-const databaseName = "§§deploy_your_startup.project_name§§_e2e";
+const databaseName =
+  process.env.E2E_DB_NAME || `${basename(resolve(".."))}_e2e`;
 
 export default defineConfig({
   testDir: "./tests",
