@@ -10,6 +10,10 @@ development servers, factory-based tests) and about-phil (Compose Postgres with
 health checks and an explicit DATABASE_URL bypass). Application-specific games,
 Vue, oauth2-proxy and AI services are intentionally owned by their projects.
 
+The latest gaming-buch-club service refactor also supplies generic HTMX response
+helpers, image resizing/compression, isolated upload-test helpers and their
+image tests. New apps should keep business logic in services and views thin.
+
 `deployment/group_vars/*.yml` seeds a new project but is preserved on updates.
 Copier answers contain only public parameters, never tokens or private keys.
 Vault encryption and provisioning remain the responsibility of startup CLI.

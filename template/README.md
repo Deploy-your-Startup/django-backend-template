@@ -25,6 +25,10 @@ The backend uses Django and FastAPI in one ASGI application. Backend tests use
 pytest-django; create entities through factories, use GIVEN / WHEN / THEN, and
 start every test with an empty database.
 
+`project.htmx` supplies event/toast responses, `project.images` handles image
+resizing/compression, and `project.testing` supplies temporary media directories
+and upload fixtures. Put application logic in services and keep views thin.
+
 Local Postgres starts automatically through `backend/docker-compose.yml` with
 a health check. Set DATABASE_URL to use an existing database (production and CI
 never start Docker). LOCAL_DB_NAME and POSTGRES_PORT isolate concurrent stacks.
