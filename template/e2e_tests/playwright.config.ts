@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.E2E_APP_PORT || 8001);
 const url = `http://127.0.0.1:${port}`;
+const databaseName = "§§deploy_your_startup.project_name§§_e2e";
 
 export default defineConfig({
   testDir: "./tests",
@@ -17,10 +18,7 @@ export default defineConfig({
     url: `${url}/api/health`,
     env: {
       // Keep the test stack separate from the development database and port.
-      LOCAL_DB_NAME: "§§deploy_your_startup.project_name§§_e2e".replaceAll(
-        "-",
-        "_",
-      ),
+      LOCAL_DB_NAME: databaseName.replaceAll("-", "_"),
       POSTGRES_PORT: process.env.E2E_POSTGRES_PORT || "55432",
     },
     reuseExistingServer: false,
