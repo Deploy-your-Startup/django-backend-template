@@ -1,43 +1,5 @@
-[tasks."backend:dev"]
-dir = "backend"
-run = "./make.sh run_dev"
+[tools]
+node = "24"
 
-[tasks."backend:lint"]
-dir = "backend"
+[tasks."template:check"]
 run = "./make.sh lint"
-
-[tasks."backend:test"]
-dir = "backend"
-run = "./make.sh test"
-
-[tasks."deployment:setup"]
-dir = "deployment"
-run = "./make.sh setup"
-
-[tasks."deployment:deploy"]
-dir = "deployment"
-run = "./make.sh deploy --environment production"
-
-[tasks."deployment:infrastructure"]
-dir = "deployment"
-run = "./make.sh infrastructure --environment production"
-
-[tasks."deployment:kubeconfig"]
-dir = "deployment"
-run = "./make.sh kubeconfig --environment production"
-
-[tasks."deployment:backup"]
-dir = "deployment"
-run = "./make.sh backup --environment production"
-
-[tasks."deployment:restore"]
-dir = "deployment"
-run = "./make.sh restore --environment production"
-
-[tasks."deployment:update-vms"]
-dir = "deployment"
-run = "./make.sh update_vms --environment production"
-
-[tasks."deployment:k3s-upgrade"]
-dir = "deployment"
-run = "./make.sh k3s_upgrade --environment production"

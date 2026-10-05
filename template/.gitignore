@@ -1,0 +1,6 @@
+.idea/
+*.bak
+.DS_Store
+deployment/.shared-roles/
+deployment/.venv/
+deployment/roles/
