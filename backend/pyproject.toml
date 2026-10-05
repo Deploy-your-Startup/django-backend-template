@@ -22,16 +22,16 @@ dev = [
     # Pinned to a minor series: ruff's *default* rule set grows with releases,
     # and `./make.sh lint` gates CI, so an unpinned bump could flood a project
     # with errors nobody introduced. Bump deliberately, then `./make.sh format`.
-    "ruff>=0.16.5,<0.17",
+    "ruff>=0.16.8,<0.17",
     # Exact pin, not a range: ty is 0.0.x and explicitly has no stable API —
     # diagnostics can change between any two releases. Since it blocks the
     # lint gate, an unpinned bump would turn every pipeline red at once.
-    "ty==0.0.75",
+    "ty==0.0.82",
     # Teaches every type checker what Django generates at runtime (`objects`,
     # field types). Without it ty reports `Model has no attribute "objects"`
     # on every query. Reverse relations from `related_name` still need the
     # mypy plugin and stay unresolved — suppress those where they appear.
-    "django-stubs>=6.1.0",
+    "django-stubs>=6.1.1",
     "docker>=7.2.0,<8",
     "httpx>=0.28.1,<0.29",
     "pytest>=9.1.1,<10",
