@@ -1,0 +1,62 @@
+_min_copier_version: '9.18.2'
+_subdirectory: template
+# Render the existing placeholder syntax. Django, Ansible, GitHub expressions
+# and Docker Go templates retain their own delimiters verbatim.
+_templates_suffix: ''
+_envops:
+  variable_start_string: '§§deploy_your_startup.'
+  variable_end_string: '§§'
+  block_start_string: '§§%'
+  block_end_string: '%§§'
+  comment_start_string: '§§#'
+  comment_end_string: '#§§'
+  keep_trailing_newline: true
+_exclude:
+  - .git
+  - copier.yml
+  - TEMPLATE.md
+  - .github/workflows/template-check.yml
+  - '**/.venv'
+  - '**/__pycache__'
+  - '**/node_modules'
+  - '**/.pytest_cache'
+  - '**/.ruff_cache'
+  - '**/test-results'
+  - '**/playwright-report'
+_skip_if_exists:
+  # These files contain project-specific infrastructure and vaulted secrets.
+  # Seed new projects once; never rewrite existing files during an update.
+  - deployment/group_vars/*.yml
+project_name:
+  type: str
+  help: Repository name (kebab-case)
+base_domain:
+  type: str
+  help: Owned domain
+github_username:
+  type: str
+  help: GitHub user or organisation
+additional_domains:
+  type: str
+  default: '[]'
+  help: YAML list fragment (supplied by startup bootstrap)
+deploy_repo_name:
+  type: str
+  default: deploy-your-startup
+docker_registry_host:
+  type: str
+  default: 'ghcr.io/§§deploy_your_startup.github_username§§'
+postgres_version:
+  type: str
+  default: '17'
+k8s_namespace:
+  type: str
+  default: default
+ci_key:
+  type: str
+  default: ''
+  help: Public CI SSH key (private keys stay in Vault)
+user_key:
+  type: str
+  default: ''
+  help: Public operator SSH key

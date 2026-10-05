@@ -1,0 +1,22 @@
+# Development only. Production and CI set DATABASE_URL and never start Docker.
+# LOCAL_DB_NAME separates development and test stacks. POSTGRES_PORT must also
+# differ when multiple stacks run concurrently.
+services:
+  db:
+    image: postgres:§§deploy_your_startup.postgres_version§§
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-§§deploy_your_startup.project_name§§_backend}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      # Parent directory works with both the pre-18 and PostgreSQL 18 layouts.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-§§deploy_your_startup.project_name§§_backend}']
+      interval: 1s
+      timeout: 5s
+      retries: 60
+volumes:
+  db-data:
