@@ -38,12 +38,14 @@ def generate_cors_allowed_origins(hosts):
 
 CORS_ALLOWED_ORIGINS = generate_cors_allowed_origins(ALLOWED_HOSTS)
 
+LOCAL_DB_NAME = os.getenv("LOCAL_DB_NAME", PROJECT_NAME.replace("-", "_") + "_backend")
+
 database_url_for_local_development = ""
 if not os.getenv("DATABASE_URL"):
     import docker_database_url
 
     database_url_for_local_development = docker_database_url.start_db_and_get_url(
-        db_name="§§deploy_your_startup.project_name§§".replace("-", "_"),
+        db_name=LOCAL_DB_NAME,
         database_url_name="DATABASE_URL",
     )
 default_database_url = os.getenv(

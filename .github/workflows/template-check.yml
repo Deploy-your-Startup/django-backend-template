@@ -1,0 +1,49 @@
+name: Check generated Django project
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  generated-project:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: template_check
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U admin"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      DATABASE_URL: postgres://admin:admin@127.0.0.1:5432/template_check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Render the project
+        run: >-
+          uv run --no-project --with copier==9.18.2 copier copy
+          --defaults --vcs-ref HEAD
+          --data project_name=template-check
+          --data base_domain=example.com
+          --data github_username=example
+          . ../generated
+      - name: Lint generated backend
+        working-directory: ../generated/backend
+        run: ./make.sh lint
+      - name: Test generated backend
+        working-directory: ../generated/backend
+        run: ./make.sh test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser test dependencies
+        working-directory: ../generated/e2e_tests
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: Test the generated application in a browser
+        working-directory: ../generated/e2e_tests
+        run: ./make.sh lint && ./make.sh test_e2e

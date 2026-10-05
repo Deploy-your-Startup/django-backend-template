@@ -1,15 +1,13 @@
-## Local development environment
+# Deploy your Startup — Django template
 
-Install the shared machine setup first, then use the global `uv` installation
-with the Python version committed in each service's `.python-version` file.
-Mise exposes the existing development commands without managing Python or uv:
+A versioned Copier template for Django + FastAPI services, maintained through
+startup CLI. The generated project lives under `template/`; instructions for
+maintainers and the source projects are in [TEMPLATE.md](TEMPLATE.md).
 
 ```bash
-mise tasks
-mise run backend:dev
-mise run backend:lint
-mise run backend:test
+startup bootstrap --template https://github.com/Deploy-your-Startup/django-backend-template.git --template-version <tag-or-commit>
 ```
 
-Running `uv sync` or any mise task in `backend/` and `deployment/` automatically
-selects that service's Python version.
+This repository is not an application checkout. Generate a test project before
+running its service tasks. CI generates the project and checks backend lint,
+backend tests and the Playwright browser smoke test.
