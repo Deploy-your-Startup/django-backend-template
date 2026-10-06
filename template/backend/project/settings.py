@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 PROJECT_NAME = "§§deploy_your_startup.project_name§§"
 
-SECRET_KEY = "django-insecure-change-me-in-production"
+SECRET_KEY = os.environ["SECRET_KEY"] if os.getenv("PRODUCTION") else "local-dev-only"
 
 DEBUG = not os.getenv("PRODUCTION")
 
