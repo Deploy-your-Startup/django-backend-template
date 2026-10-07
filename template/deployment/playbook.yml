@@ -139,8 +139,11 @@
       tags: postgres
 
     - name: "copy backend role into deployment"
-      connection: local
-      copy:
+      delegate_to: localhost
+      become: false
+      vars:
+        ansible_python_interpreter: "{{ ansible_playbook_python }}"
+      ansible.builtin.copy:
         src: ../backend/deployment/
         dest: ./roles/backend
       tags: backend
