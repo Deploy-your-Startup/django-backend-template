@@ -48,7 +48,7 @@ docker_registry_host:
   default: 'ghcr.io/§§deploy_your_startup.github_username§§'
 postgres_version:
   type: str
-  default: '17'
+  default: '18.6'
 k8s_namespace:
   type: str
   default: default
