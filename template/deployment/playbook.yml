@@ -126,17 +126,17 @@
     - name: "deploy docker-secrets"
       import_role:
         name: docker-secrets
-      tags: docker-secrets
+      tags: docker-secrets,backend
 
     - name: "deploy cert-manager"
       import_role:
         name: cert-manager
-      tags: cert-manager
+      tags: cert-manager,backend
 
     - name: "deploy postgres"
       import_role:
         name: postgres
-      tags: postgres
+      tags: postgres,backend
 
     - name: "copy backend role into deployment"
       delegate_to: localhost
