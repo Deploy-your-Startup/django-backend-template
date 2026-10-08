@@ -51,7 +51,7 @@ Bootstrap one cluster owner with `--shared-cluster` and export its public
 connection descriptor with `startup cluster export`. Additional startups use
 `startup bootstrap --cluster <descriptor>` and deploy into their own namespaces.
 Their `deployment/cluster.yml` records the cluster identity and owner; keep it
-and `group_vars/cluster.yml` committed. The owner manages nodes and cluster
+and the ownership settings in `group_vars/all.yml` committed. The owner manages nodes and cluster
 upgrades. Attached projects only deploy and operate their own application data.
 
 Namespaces receive default resource limits, quotas and network policies. Review
