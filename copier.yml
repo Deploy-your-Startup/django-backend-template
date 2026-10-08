@@ -43,6 +43,10 @@ additional_domains:
 deploy_repo_name:
   type: str
   default: deploy-your-startup
+deploy_ref:
+  type: str
+  default: main
+  help: Reviewed shared deployment workflow ref
 docker_registry_host:
   type: str
   default: 'ghcr.io/§§deploy_your_startup.github_username§§'
