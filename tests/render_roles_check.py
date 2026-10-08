@@ -26,6 +26,13 @@ with tempfile.TemporaryDirectory() as temporary:
         assert task["vars"]["ansible_python_interpreter"] == "{{ ansible_playbook_python }}"
     preparation = [task for task in tasks if task.get("import_role", {}).get("name") == "kubernetes-client"]
     assert preparation and preparation[0]["tags"] == "always"
+    # GIVEN a rendered project, WHEN deploying only backend, THEN its database
+    # and registry/TLS prerequisites are selected before the application.
+    backend = next(i for i, task in enumerate(tasks) if task.get("name") == "deploy backend")
+    for role in ("docker-secrets", "cert-manager", "postgres"):
+        index = next(i for i, task in enumerate(tasks) if task.get("import_role", {}).get("name") == role)
+        assert index < backend
+        assert "backend" in tasks[index]["tags"].split(",")
     variables = yaml.load((generated / "deployment/group_vars/production.yml").read_text(), Loader=yaml.BaseLoader)
     assert variables["postgres_version"] == "18.6"
     dependency = (generated / "deployment/pyproject.toml").read_text()
