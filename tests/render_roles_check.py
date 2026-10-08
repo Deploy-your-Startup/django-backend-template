@@ -46,5 +46,5 @@ with tempfile.TemporaryDirectory() as temporary:
     variables = yaml.load((generated / "deployment/group_vars/production.yml").read_text(), Loader=yaml.BaseLoader)
     assert variables["postgres_version"] == "18.6"
     dependency = (generated / "deployment/pyproject.toml").read_text()
-    assert 'rev = "3b92a4c8f8b685a4371e7d1d6b8b0bbc1cd38c08"' in dependency
+    assert 'rev = "bdad8756176f2dde994c75ad8a354b4e59e45338"' in dependency
     print("Real Copier render: pinned CLI, current Postgres and controller copies verified")
