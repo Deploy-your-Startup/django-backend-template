@@ -15,7 +15,14 @@ with tempfile.TemporaryDirectory() as temporary:
         ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "dist", ".ruff_cache"))
     copier.run_copy(str(source), str(generated), defaults=True, unsafe=True, quiet=True,
                     data={"project_name": "role-check", "base_domain": "example.com",
-                          "github_username": "example"})
+                          "github_username": "example", "deploy_ref": "codex/shared-cluster"})
+    workflows = list((generated / ".github/workflows").glob("*.yml"))
+    callers = [yaml.safe_load(path.read_text()) for path in workflows]
+    shared_jobs = [job for workflow in callers for job in workflow.get("jobs", {}).values()
+                   if "uses" in job and "/deploy-your-startup/" in job["uses"]]
+    assert shared_jobs
+    assert all(job["uses"].endswith("@codex/shared-cluster") for job in shared_jobs)
+    assert not any("§§deploy_your_startup.deploy_ref§§" in path.read_text() for path in workflows)
     playbook = yaml.safe_load((generated / "deployment/playbook.yml").read_text())
     tasks = [task for play in playbook for task in play.get("tasks", [])]
     copies = [task for task in tasks if task.get("name", "").startswith("copy ")]

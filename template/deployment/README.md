@@ -44,3 +44,22 @@ vault password automatically.
 # Rotate vault password
 ./make.sh rotate_vault_password --old-password <old> --new-password <new>
 ```
+
+## Shared-cluster projects
+
+Bootstrap one cluster owner with `--shared-cluster` and export its public
+connection descriptor with `startup cluster export`. Additional startups use
+`startup bootstrap --cluster <descriptor>` and deploy into their own namespaces.
+Their `deployment/cluster.yml` records the cluster identity and owner; keep it
+and `group_vars/cluster.yml` committed. The owner manages nodes and cluster
+upgrades. Attached projects only deploy and operate their own application data.
+
+Namespaces receive default resource limits, quotas and network policies. Review
+these settings before adding workloads. The deployment SSH key retains server
+administrator access, so use this mode only for mutually trusted projects.
+Postgres and media use local node storage and need verified per-project backups.
+Shared cluster failures affect all attached applications.
+
+The Copier `deploy_ref` answer selects the shared workflow ref. Bootstrap's
+`--deployment-ref` exposes it for a reviewed branch or commit. It defaults to
+`main`, preserving existing workflow references.
