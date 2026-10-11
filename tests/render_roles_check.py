@@ -31,6 +31,7 @@ with tempfile.TemporaryDirectory() as temporary:
     backend_job = next(job for job in shared_jobs if job.get("with", {}).get("service") == "backend")
     assert backend_job["with"]["run_tests"] is True
     assert backend_job["with"]["require_coverage"] is True
+    assert backend_job["with"]["coverage_measured_from"] == "Integration"
     assert "coverage/cobertura.xml" in (generated / "AGENTS.md").read_text()
     assert (generated / "docs/testing.md").is_file()
     assert not (generated / "docs/architecture/0007-coverage-report-contract.md").exists()
