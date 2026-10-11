@@ -60,7 +60,6 @@ if [ "${1:-}" == "run_dev" ]; then
             *) echo "Unknown option: $1" >&2; exit 2 ;;
         esac
     done
-    cd "$(cd "$(dirname "$0")" && pwd)"
     uv run python manage.py migrate --noinput --settings project.settings
     if [ "$flush" == "true" ]; then
         uv run python manage.py flush --noinput --settings project.settings
@@ -143,7 +142,8 @@ if [ "${1:-}" == "restore_local" ]; then
         shift
     done
 
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    # make.sh already changed into its own directory; "$0" may be relative.
+    script_dir="$(pwd)"
     project_slug="§§deploy_your_startup.project_name§§"
     project_db="${project_slug//-/_}_backend"
     backup_dir="${backup_dir:-$HOME/Backups/$project_slug}"
