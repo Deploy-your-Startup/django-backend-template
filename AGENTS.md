@@ -7,7 +7,8 @@ Users retain ownership of their code, accounts, servers and credentials.
 
 ## Tests and runtime
 
-Every behavior change ships with integration tests, never unit tests. Exercise
+Every change ships with integration tests, plus E2E tests when a user flow
+changes. Never write unit tests. Exercise
 real scripts, Git repositories, Copier renders or Ansible loading and assert
 what the user sees. Replace only external boundaries that cannot run locally.
 Keep GIVEN / WHEN / THEN explicit, with one business action per scenario.

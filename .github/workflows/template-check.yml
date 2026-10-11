@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  # Coverage comment from the shared report action.
+  pull-requests: write
 
 jobs:
   generated-project:
@@ -29,6 +31,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Check rendered deployment contract
         run: bash tests/render_roles_test.sh
+      - name: Test optional local coverage contract
+        run: bash tests/coverage_harness_test.sh
       - name: Test standalone agent instructions and core ADRs
         run: bash tests/agent_instructions_test.sh
       - name: Render the project
@@ -52,13 +56,27 @@ jobs:
         run: ./make.sh lint
       - name: Test generated backend
         working-directory: ../generated/backend
-        run: ./make.sh test
+        run: ./make.sh coverage
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
       - name: Install browser test dependencies
         working-directory: ../generated/e2e_tests
         run: npm ci && npx playwright install --with-deps chromium
+      - name: Check public contracts and inferred helper returns
+        run: bash tests/typing_policy_integration_test.sh ../generated
       - name: Test the generated application in a browser
         working-directory: ../generated/e2e_tests
-        run: ./make.sh lint && ./make.sh test_e2e
+        run: ./make.sh lint && STARTUP_COVERAGE=true ./make.sh test_e2e
+      - name: Check the coverage harness contract
+        working-directory: ../generated/backend
+        run: |
+          # Integration tests and the measured E2E server, combined.
+          grep -q 'filename="api/routes.py"' coverage/cobertura.xml
+          ls coverage/integration.coverage coverage/e2e.coverage.*
+      - name: Report coverage of the generated project
+        uses: Deploy-your-Startup/deploy-template/.github/actions/coverage-report@b66121f4df8f2c7e9f67b96075ce8d85e81ec890
+        with:
+          title: Coverage of the generated project
+          comment_key: generated-project
+          files: backend=../generated/backend/coverage/cobertura.xml

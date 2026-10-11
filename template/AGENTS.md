@@ -62,8 +62,9 @@ own data and row invariants. Avoid a single project-wide service collection.
 - Prefer explicit code and setup over implicit conventions. In tests, keep
   scenario-specific data visible in the test instead of hiding it in shared
   magic values.
-- Declare parameter and return types on every named function and method
-  (ADR 0002); the linters enforce it, test code is exempt.
+- Declare parameter and return types at public interfaces (ADR 0002). Private
+  Python helpers and internal TypeScript helpers may infer their return types.
+  Keep callback inference; test code is exempt.
 - Comment the why, not the what; document a rule once at its interface
   (ADR 0003).
 
@@ -93,3 +94,10 @@ including `.copier-answers.yml`. A separate branch is optional; Copier does
 not commit, push or deploy. Use a tag/commit instead of `main` for a fixed target.
 Do not edit Copier answers manually. Existing deployment/group_vars files are
 preserved. `startup sync` handles shared deployment roles/workflows separately.
+
+## Coverage contract
+
+- `./make.sh coverage` runs measured tests and writes `<service>/coverage/cobertura.xml` (Cobertura XML, paths relative to the service).
+- Local `./make.sh test` and browser runs do not measure coverage by default. Generated backend pipelines set `require_coverage: true`; missing or invalid reports fail CI. No percentage threshold is enforced.
+- Measure integration and E2E tests, never add unit tests for coverage.
+- See [Testing](docs/testing.md) for commands and pipeline reports.

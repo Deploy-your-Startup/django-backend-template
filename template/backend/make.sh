@@ -4,6 +4,28 @@
 # code of the *last* line only, so a failing `ruff check` would be masked by a
 # passing `ty check` and the CI gate would go green on a lint error.
 set -e
+cd "$(dirname "$0")"
+
+# Combine the integration data from `test` with any E2E server data
+# (`run_dev --coverage true`) into coverage/cobertura.xml, the file the shared
+# pipeline reports (docs/testing.md).
+write_coverage_report() {
+    shopt -s nullglob
+    local data=(coverage/integration.coverage coverage/e2e.coverage.*)
+    shopt -u nullglob
+    local existing=()
+    for file in "${data[@]}"; do [ -f "$file" ] && existing+=("$file"); done
+    if [ ${#existing[@]} -eq 0 ]; then
+        echo "No coverage data in coverage/; run ./make.sh coverage first." >&2
+        return 1
+    fi
+    rm -f coverage/all.coverage coverage/cobertura.xml
+    uv run --group dev coverage combine --keep --quiet --data-file=coverage/all.coverage "${existing[@]}"
+    uv run --group dev coverage xml --quiet --data-file=coverage/all.coverage -o coverage/cobertura.xml
+    local total
+    total="$(uv run --group dev coverage report --data-file=coverage/all.coverage --format=total)"
+    echo "Coverage ${total}% (${#existing[@]} data files) written to coverage/cobertura.xml"
+}
 
 if [ "${1:-}" == "setup_local" ]; then
     echo "Install project dependencies from the lock file"
@@ -22,21 +44,22 @@ if [ "${1:-}" == "run_dev" ]; then
     port=8000
     reload=true
     flush=false
+    coverage=false
     while [ $# -gt 0 ]; do
         case "$1" in
-            --port|--reload|--flush|--database_url)
+            --port|--reload|--flush|--coverage|--database_url)
                 if [ $# -lt 2 ]; then echo "Missing value for $1" >&2; exit 2; fi
                 case "$1" in
                     --port) port="$2" ;;
                     --reload) reload="$2" ;;
                     --flush) flush="$2" ;;
+                    --coverage) coverage="$2" ;;
                     --database_url) export DATABASE_URL="$2" ;;
                 esac
                 shift 2 ;;
             *) echo "Unknown option: $1" >&2; exit 2 ;;
         esac
     done
-    cd "$(cd "$(dirname "$0")" && pwd)"
     uv run python manage.py migrate --noinput --settings project.settings
     if [ "$flush" == "true" ]; then
         uv run python manage.py flush --noinput --settings project.settings
@@ -45,7 +68,15 @@ if [ "${1:-}" == "run_dev" ]; then
     if [ "$reload" == "true" ]; then
         reload_flags=(--reload --reload-include '*.html')
     fi
-    exec uv run python -m uvicorn project.asgi:app --host "0.0.0.0" --port "$port" "${reload_flags[@]}"
+    runner=(python)
+    if [ "$coverage" == "true" ]; then
+        # E2E runs measure the server; data is written when uvicorn shuts down
+        # on SIGTERM. Reload would measure only the supervisor process.
+        mkdir -p coverage
+        rm -f coverage/e2e.coverage.*
+        runner=(--group dev coverage run --parallel-mode --data-file=coverage/e2e.coverage)
+    fi
+    exec uv run "${runner[@]}" -m uvicorn project.asgi:app --host "0.0.0.0" --port "$port" "${reload_flags[@]}"
 fi
 
 if [ "${1:-}" == "migrate" ]; then
@@ -62,10 +93,22 @@ if [ "${1:-}" == "dumpdata" ]; then
     uv run python manage.py dumpdata --natural-foreign --natural-primary --settings project.settings
 fi
 
-if [ "${1:-}" == "test" ]; then
-    echo "Running tests"
+if [ "${1:-}" == "test" ] || [ "${1:-}" == "coverage" ]; then
+    command="$1"
     shift
-    DJANGO_SETTINGS_MODULE=project.settings uv run python -m pytest --reuse-db --create-db -v "$@"
+    if [ "$command" == "coverage" ]; then
+        mkdir -p coverage
+        rm -f coverage/integration.coverage coverage/cobertura.xml
+        DJANGO_SETTINGS_MODULE=project.settings COVERAGE_FILE=coverage/integration.coverage \
+            uv run python -m pytest --reuse-db --create-db -v --cov --cov-report= "$@"
+        write_coverage_report
+    else
+        DJANGO_SETTINGS_MODULE=project.settings uv run python -m pytest --reuse-db --create-db -v --no-cov "$@"
+    fi
+fi
+
+if [ "${1:-}" == "coverage_report" ]; then
+    write_coverage_report
 fi
 
 if [ "${1:-}" == "format" ]; then
@@ -103,7 +146,8 @@ if [ "${1:-}" == "restore_local" ]; then
         shift
     done
 
-    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    # make.sh already changed into its own directory; "$0" may be relative.
+    script_dir="$(pwd)"
     project_slug="§§deploy_your_startup.project_name§§"
     project_db="${project_slug//-/_}_backend"
     backup_dir="${backup_dir:-$HOME/Backups/$project_slug}"
