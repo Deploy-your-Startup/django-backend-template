@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  # Coverage comment from the shared report action.
+  pull-requests: write
 
 jobs:
   generated-project:
@@ -62,3 +64,15 @@ jobs:
       - name: Test the generated application in a browser
         working-directory: ../generated/e2e_tests
         run: ./make.sh lint && ./make.sh test_e2e
+      - name: Check the coverage contract (ADR 0007)
+        working-directory: ../generated/backend
+        run: |
+          # Integration tests and the measured E2E server, combined.
+          grep -q 'filename="api/routes.py"' coverage/cobertura.xml
+          ls coverage/integration.coverage coverage/e2e.coverage.*
+      - name: Report coverage of the generated project
+        uses: Deploy-your-Startup/deploy-template/.github/actions/coverage-report@b81285c490aeb10d0fa3815abd5fedf937aff1e4
+        with:
+          title: Coverage of the generated project
+          comment_key: generated-project
+          files: backend=../generated/backend/coverage/cobertura.xml

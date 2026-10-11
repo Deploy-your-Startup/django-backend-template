@@ -78,6 +78,7 @@ Record decisions that shape the project as numbered ADRs in
 - [ADR 0004](docs/architecture/0004-application-structure.md) — load for topology, stack, authentication or database choices.
 - [ADR 0005](docs/architecture/0005-service-command-contract.md) — load when adding a service or changing make.sh, mise tasks or CI.
 - [ADR 0006](docs/architecture/0006-business-logic-in-services.md) — load when adding business rules, queries, transactions or an entry point.
+- [ADR 0007](docs/architecture/0007-coverage-report-contract.md) — load when changing test commands, coverage or the CI test reports.
 
 ## Template updates (Copier)
 
