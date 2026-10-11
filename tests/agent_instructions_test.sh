@@ -13,6 +13,14 @@ import tempfile
 import copier
 
 root = Path(sys.argv[1])
+contributors = (root / "AGENTS.md").read_text()
+assert "Every change ships with integration tests, plus E2E tests" in contributors
+assert "Never write unit tests" in contributors
+readme = (root / "README.md").read_text()
+assert "startup doctor" in readme
+assert "gh auth login" in readme
+assert re.search(r"--template-version v\d+\.\d+\.\d+", readme)
+assert "uv tool install deploy-your-startup-cli" not in readme
 with tempfile.TemporaryDirectory() as temporary:
     source = Path(temporary).resolve() / "source"
     project = Path(temporary).resolve() / "project"
