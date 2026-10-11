@@ -29,6 +29,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Check rendered deployment contract
         run: bash tests/render_roles_test.sh
+      - name: Test standalone agent instructions and core ADRs
+        run: bash tests/agent_instructions_test.sh
       - name: Render the project
         run: >-
           uv run --no-project --with copier==9.18.2 copier copy

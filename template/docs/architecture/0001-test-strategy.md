@@ -1,59 +1,55 @@
-# Test strategy
+# Integration and E2E tests with GIVEN / WHEN / THEN
 
 **Status**: Accepted
 
 ## Context
 
-The application combines business rules, PostgreSQL persistence, an HTTP API,
-server-rendered pages and a deployment. Tests must give reliable
-feedback without hiding production behaviour behind test doubles or touching
-development data.
+A feature works when its real parts work together and a user can complete the
+flow. Tests should describe that behaviour clearly and stay useful when the
+implementation is refactored.
 
 ## Decision
 
-We write integration and end-to-end tests. We do not write standalone unit
-tests, and we do not mock.
+**Integration and E2E tests only. Never write unit tests.** Every behaviour
+change includes an integration test. Changed user flows also include browser
+E2E; a bug fix begins with a scenario that reproduces the bug.
 
-1. **Backend integration tests** call the real ASGI application over HTTP and
-   use a real, empty PostgreSQL database. They cover ordinary backend
-   behaviour, including validation, permissions and persistence.
-2. **End-to-end tests** use Playwright against the running application, with
-   its own database and port. They cover the
-   user flows; a user-visible change ships with an E2E test.
+Integration tests exercise a public application interface: an HTTP route,
+Django view, management command or service use case with real PostgreSQL and
+its actual collaborators. Testing a helper in isolation is not an integration
+test, even if the helper is public or the test has GIVEN / WHEN / THEN comments.
+Browser E2E drives the running application through its actual UI and services.
 
-**No mocks, including for external services.** When the application talks to
-a service that cannot run locally (a payment provider, a mail API, an identity
-provider), start a small stand-in service instead, for example a FastAPI app
-or a container, that implements the behaviour the application relies on over
-the real protocol. The application reaches it through its normal configuration
-(a base URL or an endpoint setting), exactly as in production. Patching functions,
-stubbing `fetch` or replacing our own modules is not allowed; a test double is
-acceptable only where no stand-in service can work, and the test says why.
+Write each scenario with explicit **GIVEN / WHEN / THEN**:
 
-Each test builds its GIVEN state explicitly through factories or production
-endpoints, follows GIVEN / WHEN / THEN, and asserts what a user or API client
-observes. Scenario-specific data stays visible in the test rather than hidden
-in shared magic values.
+- **GIVEN:** arrange only the relevant state through factories or real write
+  endpoints. Keep scenario-specific values visible in the test.
+- **WHEN:** perform one business action. Filling and submitting one form can
+  be several browser steps but is one action; testing logout is another scenario.
+- **THEN:** assert observable results: the response or rendered page, persisted
+  data and relevant side effects. Do not assert implementation call sequences.
 
-E2E tests find elements by role and visible label, as a user does; a
-`data-testid` is added only where no such label exists. Each independently
-understandable scenario lives in its own focused spec file.
+Each test starts with empty, isolated data and runs independently. Use a
+separate E2E database and server; never seed or flush development or production
+resources. An empty state does not require creating a new database per test.
+
+Do not mock our own code or stub browser fetch calls. For external dependencies,
+prefer a small local stand-in reached over the real protocol. Only when that is
+impossible may the external boundary be replaced; document the reason in the
+test. Neither test level permits replacing our own application modules.
+
+Find browser controls by role and visible label. Use a data-testid only when
+there is no suitable semantic locator. Success, invalid input and denied access
+are separate scenarios; related scenarios may share one focused spec file.
 
 ## Consequences
 
-- Tests exercise PostgreSQL, HTTP and the UI with high
-  fidelity, so a green suite is meaningful evidence that the feature works.
-- Stand-in services are real code that must follow the external contract; they
-  live next to the tests that use them and are reused by local development.
-- Integration and E2E tests need local services and are slower than isolated
-  unit tests.
-- Fresh databases per test give deterministic isolation.
+- Tests document behaviour and cover real persistence and service interaction.
+- Factories make the starting state explicit; isolated data prevents order dependence.
+- Real services take more setup than isolated helper tests.
 
 ## Alternatives considered
 
-- **Unit tests with mocks or SQLite:** faster, but they hide relevant
-  production behaviour and break on refactorings that change nothing a user
-  can see.
-- **Mocking external clients in-process:** quick to write, but it tests our
-  assumptions about the client instead of the HTTP exchange the application
-  really performs.
+- **Unit tests or mocked application modules:** miss the integration that users rely on.
+- **UI clicks for all fixture setup:** slow down tests and obscure the action under test.
+- **Shared mutable test data:** makes outcomes depend on execution order.
