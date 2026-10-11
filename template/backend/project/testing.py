@@ -6,7 +6,7 @@ import tempfile
 from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponse
+from django.http.response import HttpResponseBase
 from django.test import TestCase, override_settings
 from PIL import Image
 
@@ -32,6 +32,6 @@ class MediaTestCase(TestCase):
         self.addCleanup(shutil.rmtree, self.media_root, True)
 
 
-def toast(response: HttpResponse) -> str:
+def toast(response: HttpResponseBase) -> str:
     """The toast message an HTMX response triggers."""
     return json.loads(response["HX-Trigger"])["showMessage"]
