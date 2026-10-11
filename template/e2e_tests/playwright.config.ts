@@ -16,7 +16,9 @@ export default defineConfig({
   use: { baseURL: url, trace: "on-first-retry" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `cd ../backend && ./make.sh run_dev --port ${port} --reload false --flush true`,
+    // Measured for coverage; SIGTERM lets the server save its data.
+    command: `cd ../backend && ./make.sh run_dev --port ${port} --reload false --flush true --coverage true`,
+    gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     url: `${url}/api/health`,
     env: {
       // Keep the test stack separate from the development database and port.
