@@ -81,8 +81,9 @@ extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
 extend-select = ["I", "E", "F", "B", "UP", "ANN"]
+# Public functions keep explicit signatures; private helper returns may be inferred.
 # ANN401: `Any` is sometimes the honest type at framework boundaries.
-ignore = ["E501", "ANN401"]
+ignore = ["E501", "ANN401", "ANN202"]
 
 [tool.ruff.lint.per-file-ignores]
 # Production signatures are contracts (docs/architecture/0002); a test's are not.

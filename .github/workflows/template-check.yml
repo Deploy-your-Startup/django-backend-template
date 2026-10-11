@@ -61,6 +61,8 @@ jobs:
       - name: Install browser test dependencies
         working-directory: ../generated/e2e_tests
         run: npm ci && npx playwright install --with-deps chromium
+      - name: Check public contracts and inferred helper returns
+        run: bash tests/typing_policy_integration_test.sh ../generated
       - name: Test the generated application in a browser
         working-directory: ../generated/e2e_tests
         run: ./make.sh lint && ./make.sh test_e2e
