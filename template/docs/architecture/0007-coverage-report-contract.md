@@ -27,9 +27,9 @@ measured stays inside the service; consumers read only that file.
 - **Other services:** a service added later, for example a frontend, joins by
   writing its own `coverage/cobertura.xml`. A browser frontend is measured
   through the E2E tests (V8 coverage collected by Playwright), not unit tests.
-- **CI:** the shared build workflow mounts `<service>/coverage/` out of the
-  test container. When `./make.sh test` left a `cobertura.xml` there, a small
-  script in the shared repository adds the line and branch rates to the job
+- **CI:** the shared build workflow copies `<service>/coverage/cobertura.xml`
+  out of the test container when `./make.sh test` wrote it. A small
+  script in the shared repository adds its line and branch rates to the job
   summary and to one pull request comment per service. Services without the
   file are skipped silently. There is no threshold.
 
