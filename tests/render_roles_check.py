@@ -26,6 +26,14 @@ with tempfile.TemporaryDirectory() as temporary:
     assert shared_jobs
     assert all(job["uses"].endswith("@codex/shared-cluster") for job in shared_jobs)
     assert not any("§§deploy_your_startup.deploy_ref§§" in path.read_text() for path in workflows)
+    # GIVEN a real generated backend, WHEN CI calls the shared harness,
+    # THEN coverage is required and the portable instructions define its contract.
+    backend_job = next(job for job in shared_jobs if job.get("with", {}).get("service") == "backend")
+    assert backend_job["with"]["run_tests"] is True
+    assert backend_job["with"]["require_coverage"] is True
+    assert "coverage/cobertura.xml" in (generated / "AGENTS.md").read_text()
+    assert (generated / "docs/testing.md").is_file()
+    assert not (generated / "docs/architecture/0007-coverage-report-contract.md").exists()
     playbook = yaml.safe_load((generated / "deployment/playbook.yml").read_text())
     tasks = [task for play in playbook for task in play.get("tasks", [])]
     copies = [task for task in tasks if task.get("name", "").startswith("copy ")]

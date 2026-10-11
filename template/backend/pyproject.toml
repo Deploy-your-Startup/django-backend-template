@@ -36,7 +36,7 @@ dev = [
     "pytest>=9.1.1,<10",
     "pytest-django>=4.14.0,<5",
     "pytest-asyncio>=1.4.0,<2",
-    # Measures integration tests and the E2E server (docs/architecture/0007).
+    # Measures integration tests and the E2E server (docs/testing.md).
     "pytest-cov>=7.1.0,<8",
     "factory-boy>=3.3.3,<4",
 ]
@@ -53,8 +53,8 @@ DJANGO_SETTINGS_MODULE = "project.settings"
 python_files = ["tests.py", "test_*.py", "*_test.py"]
 asyncio_mode = "auto"
 
-# `./make.sh test` and the E2E server write data to coverage/; `./make.sh
-# coverage` combines it into coverage/cobertura.xml (docs/architecture/0007).
+# `./make.sh coverage` measures integration tests; explicitly enabled E2E
+# runs add server data. `coverage_report` combines the available data.
 [tool.coverage.run]
 source = ["."]
 branch = true
