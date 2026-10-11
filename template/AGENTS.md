@@ -62,8 +62,9 @@ own data and row invariants. Avoid a single project-wide service collection.
 - Prefer explicit code and setup over implicit conventions. In tests, keep
   scenario-specific data visible in the test instead of hiding it in shared
   magic values.
-- Declare parameter and return types on every named function and method
-  (ADR 0002); the linters enforce it, test code is exempt.
+- Declare parameter and return types at public interfaces (ADR 0002). Private
+  Python helpers and internal TypeScript helpers may infer their return types.
+  Keep callback inference; test code is exempt.
 - Comment the why, not the what; document a rule once at its interface
   (ADR 0003).
 
