@@ -28,6 +28,7 @@ jobs:
       platforms: linux/amd64,linux/arm64
       service: backend
       run_tests: true
+      require_coverage: true
       # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
       run_lint: true
     secrets:

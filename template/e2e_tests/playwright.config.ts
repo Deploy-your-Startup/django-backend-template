@@ -17,7 +17,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     // Measured for coverage; SIGTERM lets the server save its data.
-    command: `cd ../backend && ./make.sh run_dev --port ${port} --reload false --flush true --coverage true`,
+    command: `cd ../backend && ./make.sh run_dev --port ${port} --reload false --flush true --coverage ${process.env.STARTUP_COVERAGE === "true"}`,
     gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     url: `${url}/api/health`,
     env: {
