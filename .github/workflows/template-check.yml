@@ -71,7 +71,7 @@ jobs:
           grep -q 'filename="api/routes.py"' coverage/cobertura.xml
           ls coverage/integration.coverage coverage/e2e.coverage.*
       - name: Report coverage of the generated project
-        uses: Deploy-your-Startup/deploy-template/.github/actions/coverage-report@b81285c490aeb10d0fa3815abd5fedf937aff1e4
+        uses: Deploy-your-Startup/deploy-template/.github/actions/coverage-report@b6ff95aa3fa3a28f915f622be89840482b7615a6
         with:
           title: Coverage of the generated project
           comment_key: generated-project
