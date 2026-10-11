@@ -14,14 +14,35 @@ Each service owns its `make.sh` contract: `format` changes files, `lint` only
 checks them. Run the versions pinned in pyproject.toml through uv run. CI must
 only lint, never format. Do not add pre-commit hooks.
 
-Tests create entities through factories, use GIVEN / WHEN / THEN and start with
-an empty database. Keep business logic in services and routes/views thin.
-E2E uses a separate database and server; never point its flush at development
-or production data. Local Postgres is started by Compose only when DATABASE_URL
-is absent. Configure LOCAL_DB_NAME and POSTGRES_PORT for concurrent stacks.
+Local Postgres is started by Compose only when DATABASE_URL is absent.
+Configure LOCAL_DB_NAME and POSTGRES_PORT for concurrent stacks.
 
 Always use startup CLI for deployment, Ansible and Vault operations. Never print
 or persist decrypted secrets. Ask before destructive restore or secret rotation.
+
+## Testing
+
+**Integration and E2E tests only. Never write unit tests.** Every behaviour
+change ships with an integration test; changed user flows also get browser E2E.
+Exercise the real application, PostgreSQL and service boundaries. Do not mock
+our own code. Use a local stand-in for an external service (ADR 0001).
+
+- **GIVEN:** arrange the relevant state explicitly with factories or real write
+  endpoints. Name the scenario-specific values in the test.
+- **WHEN:** perform one business action through the application's public interface.
+- **THEN:** assert the result a user or API client observes, including persistence
+  and side effects where relevant. Do not assert private helper calls.
+- Each test starts with an empty, isolated database and must pass independently.
+  Never seed or flush development or production data.
+- Find browser elements by role and visible label. Test success, validation and
+  permission failures as separate scenarios.
+
+## Business logic
+
+Keep business logic in **`services.py` per Django app or business area** (ADR 0006).
+Routes, views and commands adapt input, call a service and return a response.
+Services own business rules, queries, transactions and side effects; models
+own data and row invariants. Avoid a single project-wide service collection.
 
 ## Working conventions
 
@@ -31,9 +52,6 @@ or persist decrypted secrets. Ask before destructive restore or secret rotation.
   Branch names and commit format: [`.github/git-commit-instructions.md`](.github/git-commit-instructions.md).
 - **Pull request titles and descriptions are always in English**, even when the
   conversation was in another language.
-- Tests: integration and E2E tests only, never unit tests, and no mocks; start
-  a small stand-in service for an external dependency instead (ADR 0001).
-  Structure every test as GIVEN / WHEN / THEN.
 - Before finishing, run lint and tests for every service you changed, and E2E
   for user-visible changes.
 
@@ -46,9 +64,6 @@ or persist decrypted secrets. Ask before destructive restore or secret rotation.
   magic values.
 - Declare parameter and return types on every named function and method
   (ADR 0002); the linters enforce it, test code is exempt.
-- Keep entry points (routes, views, commands) readable orchestrators: extract
-  validation, persistence and side effects into named functions when they
-  obscure the flow.
 - Comment the why, not the what; document a rule once at its interface
   (ADR 0003).
 
@@ -57,11 +72,12 @@ or persist decrypted secrets. Ask before destructive restore or secret rotation.
 Record decisions that shape the project as numbered ADRs in
 `docs/architecture/` and list them here with when to load them.
 
-- [ADR 0001](docs/architecture/0001-test-strategy.md) — load when writing tests or choosing a test level or test infrastructure.
+- [ADR 0001](docs/architecture/0001-test-strategy.md) — load when writing integration or E2E scenarios; includes GIVEN / WHEN / THEN and isolation.
 - [ADR 0002](docs/architecture/0002-explicit-types.md) — load when adding or changing production functions.
 - [ADR 0003](docs/architecture/0003-documentation-at-interfaces.md) — load when adding comments, documentation or an ADR.
 - [ADR 0004](docs/architecture/0004-application-structure.md) — load for topology, stack, authentication or database choices.
 - [ADR 0005](docs/architecture/0005-service-command-contract.md) — load when adding a service or changing make.sh, mise tasks or CI.
+- [ADR 0006](docs/architecture/0006-business-logic-in-services.md) — load when adding business rules, queries, transactions or an entry point.
 
 ## Template updates (Copier)
 
