@@ -29,6 +29,7 @@ jobs:
       service: backend
       run_tests: true
       require_coverage: true
+      coverage_measured_from: Integration
       # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
       run_lint: true
     secrets:
