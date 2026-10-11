@@ -24,7 +24,7 @@ if DEBUG:
     ALLOWED_HOSTS.extend(["*"])
 
 
-def generate_cors_allowed_origins(hosts):
+def generate_cors_allowed_origins(hosts: list[str]) -> list[str]:
     schemes = ["https://", "http://"]
     origins = []
     for host in hosts:
