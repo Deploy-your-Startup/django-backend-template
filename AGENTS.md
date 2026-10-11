@@ -10,7 +10,9 @@ Users retain ownership of their code, accounts, servers and credentials.
 Every behavior change ships with integration tests, never unit tests. Exercise
 real scripts, Git repositories, Copier renders or Ansible loading and assert
 what the user sees. Replace only external boundaries that cannot run locally.
-Use GIVEN / WHEN / THEN. Run mise run template:check and the generated-project workflow.
+Keep GIVEN / WHEN / THEN explicit, with one business action per scenario.
+Generated backends collect business logic in per-app services.py (ADR 0006).
+Run mise run template:check and the generated-project workflow.
 Use global uv with the committed .python-version and run project commands
 through mise. Formatting may write; lint must only check. Do not add git hooks.
 

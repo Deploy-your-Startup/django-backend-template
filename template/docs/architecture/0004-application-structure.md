@@ -23,7 +23,8 @@ flowchart LR
 2. **Django and FastAPI in one ASGI application.** Django provides the ORM,
    migrations, admin and server-rendered pages (with HTMX for interactions);
    FastAPI provides typed HTTP routes under `/api` and the OpenAPI schema.
-   Routes and views stay thin and business logic lives in services.
+   Routes and views stay thin; business logic lives in per-app `services.py`
+   (ADR 0006).
 3. **PostgreSQL** for all persistent data; schema changes go through Django
    migrations.
 4. **Deployment** to the owner's Hetzner servers running k3s, provisioned and
