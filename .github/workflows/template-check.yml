@@ -31,6 +31,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Check rendered deployment contract
         run: bash tests/render_roles_test.sh
+      - name: Test optional local coverage contract
+        run: bash tests/coverage_harness_test.sh
       - name: Test standalone agent instructions and core ADRs
         run: bash tests/agent_instructions_test.sh
       - name: Render the project
@@ -54,7 +56,7 @@ jobs:
         run: ./make.sh lint
       - name: Test generated backend
         working-directory: ../generated/backend
-        run: ./make.sh test
+        run: ./make.sh coverage
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -65,8 +67,8 @@ jobs:
         run: bash tests/typing_policy_integration_test.sh ../generated
       - name: Test the generated application in a browser
         working-directory: ../generated/e2e_tests
-        run: ./make.sh lint && ./make.sh test_e2e
-      - name: Check the coverage contract (ADR 0007)
+        run: ./make.sh lint && STARTUP_COVERAGE=true ./make.sh test_e2e
+      - name: Check the coverage harness contract
         working-directory: ../generated/backend
         run: |
           # Integration tests and the measured E2E server, combined.

@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 
 # Combine the integration data from `test` with any E2E server data
 # (`run_dev --coverage true`) into coverage/cobertura.xml, the file the shared
-# pipeline reports (docs/architecture/0007).
+# pipeline reports (docs/testing.md).
 write_coverage_report() {
     shopt -s nullglob
     local data=(coverage/integration.coverage coverage/e2e.coverage.*)
@@ -16,7 +16,7 @@ write_coverage_report() {
     local existing=()
     for file in "${data[@]}"; do [ -f "$file" ] && existing+=("$file"); done
     if [ ${#existing[@]} -eq 0 ]; then
-        echo "No coverage data in coverage/; run ./make.sh test first." >&2
+        echo "No coverage data in coverage/; run ./make.sh coverage first." >&2
         return 1
     fi
     rm -f coverage/all.coverage coverage/cobertura.xml
@@ -93,17 +93,21 @@ if [ "${1:-}" == "dumpdata" ]; then
     uv run python manage.py dumpdata --natural-foreign --natural-primary --settings project.settings
 fi
 
-if [ "${1:-}" == "test" ]; then
-    echo "Running tests"
+if [ "${1:-}" == "test" ] || [ "${1:-}" == "coverage" ]; then
+    command="$1"
     shift
-    mkdir -p coverage
-    rm -f coverage/integration.coverage
-    DJANGO_SETTINGS_MODULE=project.settings COVERAGE_FILE=coverage/integration.coverage \
-        uv run python -m pytest --reuse-db --create-db -v --cov --cov-report= "$@"
-    write_coverage_report
+    if [ "$command" == "coverage" ]; then
+        mkdir -p coverage
+        rm -f coverage/integration.coverage coverage/cobertura.xml
+        DJANGO_SETTINGS_MODULE=project.settings COVERAGE_FILE=coverage/integration.coverage \
+            uv run python -m pytest --reuse-db --create-db -v --cov --cov-report= "$@"
+        write_coverage_report
+    else
+        DJANGO_SETTINGS_MODULE=project.settings uv run python -m pytest --reuse-db --create-db -v --no-cov "$@"
+    fi
 fi
 
-if [ "${1:-}" == "coverage" ]; then
+if [ "${1:-}" == "coverage_report" ]; then
     write_coverage_report
 fi
 
