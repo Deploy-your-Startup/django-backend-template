@@ -36,6 +36,8 @@ dev = [
     "pytest>=9.1.1,<10",
     "pytest-django>=4.14.0,<5",
     "pytest-asyncio>=1.4.0,<2",
+    # Measures integration tests and the E2E server (docs/testing.md).
+    "pytest-cov>=7.1.0,<8",
     "factory-boy>=3.3.3,<4",
 ]
 
@@ -51,13 +53,37 @@ DJANGO_SETTINGS_MODULE = "project.settings"
 python_files = ["tests.py", "test_*.py", "*_test.py"]
 asyncio_mode = "auto"
 
+# `./make.sh coverage` measures integration tests; explicitly enabled E2E
+# runs add server data. `coverage_report` combines the available data.
+[tool.coverage.run]
+source = ["."]
+branch = true
+# Paths relative to the service directory, so data from the CI container, the
+# E2E server and a laptop combine into one report.
+relative_files = true
+# uvicorn re-raises SIGTERM after a graceful shutdown; save the E2E server's
+# data before the process ends.
+sigterm = true
+omit = [
+    "*/migrations/*",
+    "manage.py",
+    "**/tests.py",
+    "**/test_*.py",
+    "**/*_test.py",
+    "**/tests/*",
+]
+
+[tool.coverage.report]
+skip_empty = true
+
 [tool.ruff]
 extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
 extend-select = ["I", "E", "F", "B", "UP", "ANN"]
+# Public functions keep explicit signatures; private helper returns may be inferred.
 # ANN401: `Any` is sometimes the honest type at framework boundaries.
-ignore = ["E501", "ANN401"]
+ignore = ["E501", "ANN401", "ANN202"]
 
 [tool.ruff.lint.per-file-ignores]
 # Production signatures are contracts (docs/architecture/0002); a test's are not.

@@ -4,8 +4,10 @@ This project is generated with Copier through `startup bootstrap`. Keep
 `.copier-answers.yml` committed; it records the template source, baseline and
 public project parameters used for future updates.
 
-Install the shared machine setup first, then use the global `uv` installation
-with the Python version committed in each service's `.python-version` file.
+Install [mise](https://mise.jdx.dev/getting-started.html),
+[uv](https://docs.astral.sh/uv/getting-started/installation/) and Docker Desktop
+before local development. Use global uv with each service's committed
+`.python-version` file.
 Mise exposes the existing development commands without managing Python or uv:
 
 ```bash
