@@ -37,6 +37,14 @@ jobs:
           --data base_domain=example.com
           --data github_username=example
           . ../generated
+      - name: Check that agent instructions ship with the project
+        working-directory: ../generated
+        run: |
+          grep -qx '@AGENTS.md' CLAUDE.md
+          test -f .github/git-commit-instructions.md
+          adrs=$(grep -o 'docs/architecture/[^)]*\.md' AGENTS.md)
+          test -n "$adrs"
+          for adr in $adrs; do test -f "$adr" || { echo "missing $adr"; exit 1; }; done
       - name: Lint generated backend
         working-directory: ../generated/backend
         run: ./make.sh lint

@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -30,7 +31,7 @@ def respond(
     *,
     level: int = messages.SUCCESS,
     events: dict | None = None,
-    **redirect_kwargs,
+    **redirect_kwargs: Any,
 ) -> HttpResponse:
     """Show a message: as toast for HTMX, otherwise as Django message + redirect."""
     if is_htmx(request):
