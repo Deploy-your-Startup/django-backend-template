@@ -54,6 +54,8 @@ own data and row invariants. Avoid a single project-wide service collection.
   conversation was in another language.
 - Before finishing, run lint and tests for every service you changed, and E2E
   for user-visible changes.
+- Before committing, check `git status --short --ignored` for files you created:
+  a passing local run proves nothing if CI checks out without an ignored file.
 
 ## Code style
 
