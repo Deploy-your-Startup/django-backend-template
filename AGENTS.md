@@ -25,6 +25,8 @@ template/docs/architecture/. Treat them as part of the product. Keep the
 template's own code compliant with them (the linters enforce what they can),
 add an ADR when the template makes a new structural decision, and keep the
 ADR list in template/AGENTS.md in sync. CI checks that they ship.
+Carry recurring application fixes into this foundation with a regression check;
+keep generated instructions concise and preserve application customizations.
 
 ## Release and operations
 

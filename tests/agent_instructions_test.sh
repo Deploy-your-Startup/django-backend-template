@@ -38,6 +38,9 @@ with tempfile.TemporaryDirectory() as temporary:
     assert "Never write unit tests" in instructions
     assert "GIVEN / WHEN / THEN" in instructions
     assert "## Testing" in instructions
+    assert "Run browser E2E in PR CI" in instructions
+    assert "verify live CSS/JS and a core user flow" in instructions
+    assert "HTTP 200 alone is insufficient" in instructions
 
     # THEN the security obligations survive the real Copier render too.
     assert "## Security before public sharing" in instructions
