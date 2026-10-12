@@ -37,6 +37,8 @@ decrypted secrets. Ask before destructive restores or secret rotation.
   description.
 - Before finishing, run lint and tests for every changed service and E2E for
   user-visible changes.
+- Before committing, check `git status --short --ignored` for files you created:
+  a passing local run proves nothing if CI checks out without an ignored file.
 
 ## Architecture decisions
 

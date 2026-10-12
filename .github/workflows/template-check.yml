@@ -33,6 +33,8 @@ jobs:
         run: bash tests/render_roles_test.sh
       - name: Test optional local coverage contract
         run: bash tests/coverage_harness_test.sh
+      - name: Test that app static assets are committed
+        run: bash tests/static_assets_test.sh
       - name: Test standalone agent instructions and core ADRs
         run: bash tests/agent_instructions_test.sh
       - name: Follow every relative link in the template's Markdown
