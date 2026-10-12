@@ -37,6 +37,21 @@ our own code. Use a local stand-in for an external service (ADR 0001).
 - Find browser elements by role and visible label. Test success, validation and
   permission failures as separate scenarios.
 
+## Security before public sharing
+
+- Test anonymous and other-account access to private data and every write; keep
+  ownership checks server-side and CSRF protection on cookie-authenticated writes.
+- Bound uploads (bytes, count, pixels), stored data and paid API usage per user;
+  rate-limit login and registration where the app handles credentials.
+- Verify production HTTPS, Secure/HttpOnly session cookies and HSTS through the
+  actual ingress; trust forwarded headers only from the trusted proxy.
+- Public links expose only explicitly approved data, never login identities,
+  secrets or source uploads. `noindex` is not access control. Verify live behaviour
+  separately from local tests before calling a release safe to share.
+
+Django session login needs production `SESSION_COOKIE_SECURE` and
+`CSRF_COOKIE_SECURE`, plus login throttling; framework defaults are insufficient.
+
 ## Business logic
 
 Keep business logic in **`services.py` per Django app or business area** (ADR 0006).
