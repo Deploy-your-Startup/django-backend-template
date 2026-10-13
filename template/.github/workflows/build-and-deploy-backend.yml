@@ -8,11 +8,17 @@ on:
   pull_request:
     paths:
       - 'backend/**'
+      - 'e2e_tests/**'
+      - '.dockerignore'
+      - '.github/workflows/build-and-deploy-backend.yml'
   push:
     branches:
       - main
     paths:
       - 'backend/**'
+      - 'e2e_tests/**'
+      - '.dockerignore'
+      - '.github/workflows/build-and-deploy-backend.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -22,12 +28,14 @@ on:
 
 jobs:
   build-and-deploy:
-    uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.deploy_repo_name§§/.github/workflows/build-and-deploy-service.yml@§§deploy_your_startup.deploy_ref§§
+    uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.deploy_repo_name§§/.github/workflows/build-and-deploy-service-parallel.yml@§§deploy_your_startup.deploy_ref§§
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
       platforms: linux/amd64,linux/arm64
       service: backend
       run_tests: true
+      run_e2e: true
+      e2e_shards: 2
       require_coverage: true
       coverage_measured_from: Integration
       # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
