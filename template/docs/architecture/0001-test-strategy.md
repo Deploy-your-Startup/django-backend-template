@@ -10,7 +10,9 @@ implementation is refactored.
 
 ## Decision
 
-**Integration and E2E tests only. Never write unit tests.** Every behaviour
+**Integration tests are the default; changed user flows require E2E tests.**
+Unit tests are reserved for complex algorithms and supplement these tests.
+Every behaviour
 change includes an integration test. Changed user flows also include browser
 E2E; a bug fix begins with a scenario that reproduces the bug.
 
@@ -42,6 +44,19 @@ Find browser controls by role and visible label. Use a data-testid only when
 there is no suitable semantic locator. Success, invalid input and denied access
 are separate scenarios; related scenarios may share one focused spec file.
 
+### Limited algorithm exception
+
+Use focused unit tests only for complex algorithms with meaningful edge cases
+or invariants, such as pathfinding, ranking or non-trivial parsing. Explain in
+the test or change description what makes the algorithm complex and which
+cases need isolated coverage. Exercise the real algorithm without mocking our
+own code. Routine helpers, views, models and service workflows stay covered
+through integration tests.
+
+Algorithm unit tests supplement integration and E2E tests; they never replace
+the required application or user-flow scenarios. Do not add unit tests merely
+to increase a coverage percentage. Use GIVEN / WHEN / THEN for them too.
+
 ## Consequences
 
 - Tests document behaviour and cover real persistence and service interaction.
@@ -50,6 +65,7 @@ are separate scenarios; related scenarios may share one focused spec file.
 
 ## Alternatives considered
 
-- **Unit tests or mocked application modules:** miss the integration that users rely on.
+- **Unit tests as the default:** miss the integration that users rely on.
+- **Mocked application modules:** hide the behaviour of real collaborators.
 - **UI clicks for all fixture setup:** slow down tests and obscure the action under test.
 - **Shared mutable test data:** makes outcomes depend on execution order.

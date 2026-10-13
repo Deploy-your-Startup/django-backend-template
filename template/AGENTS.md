@@ -22,7 +22,9 @@ or persist decrypted secrets. Ask before destructive restore or secret rotation.
 
 ## Testing
 
-**Integration and E2E tests only. Never write unit tests.** Every behaviour
+**Integration tests are the default; changed user flows require E2E tests.**
+Unit tests are reserved for complex algorithms and supplement these tests.
+Every behaviour
 change ships with an integration test; changed user flows also get browser E2E.
 Exercise the real application, PostgreSQL and service boundaries. Do not mock
 our own code. Use a local stand-in for an external service (ADR 0001).

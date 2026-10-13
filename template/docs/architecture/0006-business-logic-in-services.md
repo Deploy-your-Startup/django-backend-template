@@ -37,7 +37,9 @@ Split a growing module by use case when it becomes hard to navigate. Small
 adapters do not need an extra abstraction for every line of code.
 
 Test use cases through integration tests with real persistence and collaborators;
-cover user flows through E2E (ADR 0001). Do not unit-test or mock services.
+cover user flows through E2E (ADR 0001). Do not mock services or replace their
+use-case coverage with unit tests. Complex algorithms may additionally have
+focused unit tests under the limited exception in ADR 0001.
 
 ## Consequences
 
