@@ -3,6 +3,7 @@ __pycache__/
 *.egg-info/
 .venv/
 db.sqlite3
-static/
+# collectstatic output only; app-level static directories contain source assets.
+/static/
 media/
 coverage/
