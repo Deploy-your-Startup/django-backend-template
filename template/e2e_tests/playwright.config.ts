@@ -9,7 +9,7 @@ const databaseName =
 export default defineConfig({
   testDir: "./tests",
   workers: 1,
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
@@ -21,6 +21,7 @@ export default defineConfig({
     gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     url: `${url}/api/health`,
     env: {
+      DATABASE_URL: process.env.E2E_DATABASE_URL || "",
       // Keep the test stack separate from the development database and port.
       LOCAL_DB_NAME: databaseName.replaceAll("-", "_"),
       POSTGRES_PORT: process.env.E2E_POSTGRES_PORT || "55432",
