@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:§§deploy_your_startup.postgres_version§§
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: e2e
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U admin -d e2e"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql
+  test:
+    image: ${E2E_IMAGE:?Build the E2E image first}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      CI: "true"
+      E2E_DATABASE_URL: postgres://admin:admin@db:5432/e2e
+      DATABASE_URL: postgres://admin:admin@db:5432/e2e
+      SHARD_INDEX: ${SHARD_INDEX:-1}
+      SHARD_TOTAL: ${SHARD_TOTAL:-1}
+      STARTUP_COVERAGE: "true"
+    shm_size: 1gb

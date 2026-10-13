@@ -39,6 +39,7 @@ dev = [
     # Measures integration tests and the E2E server (docs/testing.md).
     "pytest-cov>=7.1.0,<8",
     "factory-boy>=3.3.3,<4",
+    "pytest-xdist>=3.8,<4",
 ]
 
 [tool.uv]

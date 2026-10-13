@@ -100,10 +100,10 @@ if [ "${1:-}" == "test" ] || [ "${1:-}" == "coverage" ]; then
         mkdir -p coverage
         rm -f coverage/integration.coverage coverage/cobertura.xml
         DJANGO_SETTINGS_MODULE=project.settings COVERAGE_FILE=coverage/integration.coverage \
-            uv run python -m pytest --reuse-db --create-db -v --cov --cov-report= "$@"
+            uv run python -m pytest -n "${TEST_WORKERS:-2}" --reuse-db --create-db -v --cov --cov-report= "$@"
         write_coverage_report
     else
-        DJANGO_SETTINGS_MODULE=project.settings uv run python -m pytest --reuse-db --create-db -v --no-cov "$@"
+        DJANGO_SETTINGS_MODULE=project.settings uv run python -m pytest -n "${TEST_WORKERS:-2}" --reuse-db --create-db -v --no-cov "$@"
     fi
 fi
 

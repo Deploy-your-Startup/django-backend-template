@@ -35,6 +35,8 @@ jobs:
         run: bash tests/coverage_harness_test.sh
       - name: Test standalone agent instructions and core ADRs
         run: bash tests/agent_instructions_test.sh
+      - name: Test generated container E2E shards
+        run: bash tests/container_e2e_test.sh
       - name: Render the project
         run: >-
           uv run --no-project --with copier==9.18.2 copier copy
