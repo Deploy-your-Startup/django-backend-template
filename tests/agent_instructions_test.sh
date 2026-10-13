@@ -15,7 +15,8 @@ import copier
 root = Path(sys.argv[1])
 contributors = (root / "AGENTS.md").read_text()
 assert "Every change ships with integration tests, plus E2E tests" in contributors
-assert "Never write unit tests" in contributors
+assert "Unit tests are reserved for complex algorithms" in contributors
+assert "Never write unit tests" not in contributors
 readme = (root / "README.md").read_text()
 assert "startup doctor" in readme
 assert "gh auth login" in readme
@@ -35,7 +36,8 @@ with tempfile.TemporaryDirectory() as temporary:
 
     instructions = (project / "AGENTS.md").read_text()
     assert "@AGENTS.md" in (project / "CLAUDE.md").read_text().splitlines()
-    assert "Never write unit tests" in instructions
+    assert "Unit tests are reserved for complex algorithms" in instructions
+    assert "Never write unit tests" not in instructions
     assert "GIVEN / WHEN / THEN" in instructions
     assert "## Testing" in instructions
 
@@ -63,19 +65,26 @@ with tempfile.TemporaryDirectory() as temporary:
     test_adrs = [path for path in exported_adrs if path.name.endswith("test-strategy.md")]
     assert len(test_adrs) == 1
     strategy = test_adrs[0].read_text()
-    assert "Never write unit tests" in strategy
+    assert "Unit tests are reserved for complex algorithms" in strategy
+    assert "Never write unit tests" not in strategy
     for phase in ["GIVEN", "WHEN", "THEN"]:
         assert f"**{phase}:**" in strategy
     assert "one business action" in strategy
     assert "## Consequences" in strategy
+    assert "they never replace" in strategy
+    assert "coverage percentage" in strategy
 
     if (project / "backend").exists():
         business = project / "docs/architecture/0006-business-logic-in-services.md"
         assert business in linked_adrs
         assert "services.py" in instructions
-        assert "services.py" in (project / "backend/AGENTS.md").read_text()
+        backend_instructions = (project / "backend/AGENTS.md").read_text()
+        assert "services.py" in backend_instructions
+        assert "Unit tests are reserved for complex algorithms" in backend_instructions
+        assert "never unit tests" not in backend_instructions
         assert "per Django app or business area" in business.read_text()
-        assert "Do not unit-test or mock services" in business.read_text()
+        assert "Do not mock services" in business.read_text()
+        assert "limited exception in ADR 0001" in business.read_text()
 
     print(f"Real Copier render: core instructions and {len(exported_adrs)} linked ADRs verified")
 CHECK
