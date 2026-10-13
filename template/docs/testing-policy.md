@@ -39,3 +39,11 @@ data for each shard, retain reports and failure logs, and clean up disposable
 resources. Improve speed through caching and independent parallel checks rather
 than removing required scenarios or hiding failures. Use the project's existing
 make.sh and mise commands; shared workflows consume the same service contracts.
+
+Check the portable documentation contract without starting application services:
+
+```bash
+python3 tests/test_testing_policy_integration.py
+```
+
+Application integration and E2E tests remain the project's own commands.
