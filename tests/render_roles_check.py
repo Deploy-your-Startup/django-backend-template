@@ -2,6 +2,7 @@
 from pathlib import Path
 import shutil
 import sys
+import subprocess
 import tempfile
 
 import copier
@@ -55,5 +56,8 @@ with tempfile.TemporaryDirectory() as temporary:
     variables = yaml.load((generated / "deployment/group_vars/production.yml").read_text(), Loader=yaml.BaseLoader)
     assert variables["postgres_version"] == "18.6"
     dependency = (generated / "deployment/pyproject.toml").read_text()
-    assert 'rev = "ff36aeedcdec9a634fb60500c766133c7a32e750"' in dependency
+    assert 'rev = "b5fd2595b01f58d726fbb91fc3159b2a2546187e"' in dependency
+    # GIVEN the rendered deployment, WHEN its real locked CLI is run,
+    # THEN SSH access and the cluster ownership guard work.
+    subprocess.run(["bash", str(generated / "deployment/tests/ssh-access-integration_test.sh")], check=True)
     print("Real Copier render: pinned CLI, current Postgres and controller copies verified")
