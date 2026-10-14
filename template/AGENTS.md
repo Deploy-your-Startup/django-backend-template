@@ -127,3 +127,29 @@ A green pipeline confirms the executed checks; smoke tests and skipped provider
 checks do not establish full feature coverage. Record uncovered flows and report
 remaining gaps when completing work. Never remove required E2E scenarios to
 improve deployment speed.
+
+## Legal information and optional tracking
+
+Read [Privacy](docs/privacy.md) and [ADR 0008](docs/architecture/0008-local-consent.md)
+when adding analytics, cookies, external services or personal-data processing.
+Use the existing locally bundled consent integration; do not add a hosted CMP
+account or bypass consent by inserting tracker tags. Update project disclosures
+and consent revision when purposes change. Never invent operator details or mark
+unreviewed placeholders as complete. Test no tracking before permission, after
+rejection and after withdrawal, plus public legal links.
+
+### Required onboarding before public launch
+
+When creating any startup for a user, include legal setup in onboarding before
+public launch: collect only missing, publication-approved operator name, postal
+address and contact details, and prepare a privacy notice matching the actual
+hosting, login, analytics and other data processing. Generic template text is a
+draft, not a completed notice. Ask for missing details together; never infer a
+private address or reuse another operator's information. Keep optional analytics
+disabled until disclosures are completed and reviewed. Track missing information
+explicitly and do not describe a startup as ready for public launch while this
+work is outstanding. This applies to portfolio startups and external users,
+including pitch sites even when their template has no built-in legal pages.
+Use supported site-policy configuration and checks where available; otherwise
+add the required project pages and record the gap. No extra consent-service
+account is required by the standard workflow.

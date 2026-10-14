@@ -4,7 +4,11 @@ from django.contrib import admin
 from django.contrib.staticfiles import views
 from django.urls import path
 
+from project.legal import legal_page
+
 urlpatterns = [
+    path("impressum", legal_page),
+    path("privacy", legal_page, {"page": "privacy"}),
     path("admin/", admin.site.urls),
 ]
 

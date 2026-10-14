@@ -22,8 +22,10 @@ _exclude:
   - '**/.pytest_cache'
   - '**/.ruff_cache'
   - '**/test-results'
+  - '**/privacy-test-results'
   - '**/playwright-report'
 _skip_if_exists:
+  - backend/project/site-policy.json
   # These files contain project-specific infrastructure and vaulted secrets.
   # Seed new projects once; never rewrite existing files during an update.
   - deployment/group_vars/*.yml
