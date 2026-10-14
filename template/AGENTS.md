@@ -118,3 +118,12 @@ preserved. `startup sync` handles shared deployment roles/workflows separately.
 - Local `./make.sh test` and browser runs do not measure coverage by default. Generated backend pipelines set `require_coverage: true`; missing or invalid reports fail CI. No percentage threshold is enforced.
 - Measure integration and E2E tests, never add unit tests for coverage.
 - See [Testing](docs/testing.md) for commands and pipeline reports.
+
+## Test coverage and completion claims
+
+Follow [Testing policy and completion evidence](docs/testing-policy.md).
+Keep integration tests as the default and E2E coverage for changed user flows.
+A green pipeline confirms the executed checks; smoke tests and skipped provider
+checks do not establish full feature coverage. Record uncovered flows and report
+remaining gaps when completing work. Never remove required E2E scenarios to
+improve deployment speed.
