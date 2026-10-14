@@ -71,6 +71,13 @@ with tempfile.TemporaryDirectory() as temporary:
         assert f"**{phase}:**" in strategy
     assert "one business action" in strategy
     assert "## Consequences" in strategy
+    policy = (project / "docs/testing-policy.md").read_text()
+    assert "docs/testing-policy.md" in instructions
+    assert "not a pass" in policy
+    assert "Record uncovered flows" in policy
+    assert "Every enabled shard must succeed" in policy
+    assert "../testing-policy.md" in strategy
+    assert "not that every feature" in strategy
     assert "they never replace" in strategy
     assert "coverage percentage" in strategy
 

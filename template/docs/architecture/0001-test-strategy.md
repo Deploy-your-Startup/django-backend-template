@@ -57,6 +57,15 @@ Algorithm unit tests supplement integration and E2E tests; they never replace
 the required application or user-flow scenarios. Do not add unit tests merely
 to increase a coverage percentage. Use GIVEN / WHEN / THEN for them too.
 
+## Coverage and completion evidence
+
+A green pipeline proves that its enabled checks passed, not that every feature
+has complete E2E coverage. Smoke tests cover only their named scenarios. Record
+uncovered user flows and report provider scenarios skipped because credentials
+or external environments are unavailable. Keep required E2E checks enabled while
+improving CI speed through isolation, caching and independent parallel jobs.
+See [Testing policy and completion evidence](../testing-policy.md).
+
 ## Consequences
 
 - Tests document behaviour and cover real persistence and service interaction.
