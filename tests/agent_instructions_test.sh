@@ -34,6 +34,20 @@ with tempfile.TemporaryDirectory() as temporary:
                     data={"project_name": "instructions-check",
                           "base_domain": "example.com", "github_username": "example"})
 
+    # GIVEN a rendered draft policy, WHEN the owner customizes it and Copier runs again,
+    # THEN the owner's public configuration survives overwrite/update semantics.
+    import json
+    policy_path = project / "backend/project/site-policy.json"
+    policy = json.loads(policy_path.read_text())
+    assert policy["reviewed"] is False and policy["analytics"] == "off"
+    policy["operatorName"] = "Example Operator"
+    policy_path.write_text(json.dumps(policy))
+    copier.run_copy(str(source), str(project), defaults=True, quiet=True, overwrite=True,
+                    data={"project_name": "instructions-check",
+                          "base_domain": "example.com", "github_username": "example"})
+    assert json.loads(policy_path.read_text())["operatorName"] == "Example Operator"
+    assert (project / "docs/privacy.md").is_file()
+
     instructions = (project / "AGENTS.md").read_text()
     assert "@AGENTS.md" in (project / "CLAUDE.md").read_text().splitlines()
     assert "Unit tests are reserved for complex algorithms" in instructions

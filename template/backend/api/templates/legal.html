@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% if page == 'impressum' %}Impressum{% else %}Privacy policy{% endif %}</title>
+<style>body{max-width:56rem;margin:3rem auto;padding:1rem;font:1rem/1.7 system-ui} .text{white-space:pre-line;overflow-wrap:anywhere} nav{display:flex;gap:1rem} [role=status]{border:1px solid;padding:1rem}</style></head>
+<body><main><h1>{% if page == 'impressum' %}Impressum{% else %}Privacy policy{% endif %}</h1>
+{% if not is_ready %}<p role="status">Draft — operator information and privacy disclosures are incomplete or awaiting review.</p>{% endif %}
+<h2>{% if page == 'impressum' %}Operator{% else %}Controller and contact{% endif %}</h2>
+<p>{{ policy.operatorName|default:'Operator name not provided' }}</p>
+<p class="text">{{ policy.operatorAddress|default:'Postal address not provided' }}</p>
+<p>{{ policy.contactEmail|default:'Contact email not provided' }}</p>
+{% if page == 'impressum' %}<p class="text">{{ policy.additionalImprint }}</p>{% else %}
+<h2>Processing of personal data</h2><p class="text">{{ policy.privacyNotice|default:'Project-specific disclosures have not yet been provided.' }}</p>
+<p>This template does not include optional analytics. Authentication and security cookies are used when needed for login.</p>{% endif %}
+</main><footer><nav aria-label="Legal and privacy"><a href="/impressum">Impressum</a><a href="/privacy">Privacy policy</a></nav></footer></body></html>

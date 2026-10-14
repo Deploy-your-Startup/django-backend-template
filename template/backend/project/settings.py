@@ -79,7 +79,7 @@ ROOT_URLCONF = "project.urls"
 TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "api" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
