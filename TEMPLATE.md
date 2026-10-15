@@ -5,14 +5,10 @@ the existing `§§deploy_your_startup.<field>§§` placeholders while leaving Dj
 Ansible, GitHub Actions and Docker template syntax untouched. No template tasks
 or migrations execute shell commands.
 
-The reusable foundation comes from book-reading-club (pytest-django, isolated
-development servers, factory-based tests) and example-app (Compose Postgres with
-health checks and an explicit DATABASE_URL bypass). Application-specific games,
-Vue, oauth2-proxy and AI services are intentionally owned by their projects.
-
-The latest book-reading-club service refactor also supplies generic HTMX response
-helpers, image resizing/compression, isolated upload-test helpers and their
-image tests. New apps should keep business logic in services and views thin.
+The foundation includes pytest-django, isolated development servers,
+factory-based tests, Compose Postgres health checks and an explicit DATABASE_URL
+override. Shared helpers cover HTMX responses, image resizing/compression and
+isolated upload tests. Keep business logic in services and views thin.
 
 `deployment/group_vars/*.yml` seeds a new project but is preserved on updates.
 Copier answers contain only public parameters, never tokens or private keys.
