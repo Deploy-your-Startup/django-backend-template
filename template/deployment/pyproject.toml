@@ -18,4 +18,4 @@ package = false
 override-dependencies = ["playwright; sys_platform == 'never'"]
 
 [tool.uv.sources]
-deploy-your-startup-cli = { git = "https://github.com/Deploy-your-Startup/cli.git", rev = "b5fd2595b01f58d726fbb91fc3159b2a2546187e" }
+deploy-your-startup-cli = { git = "https://github.com/Deploy-your-Startup/cli.git", rev = "b7b467d2613d0c1113519442bcae82f542a8c6d3" }
