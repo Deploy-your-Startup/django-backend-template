@@ -292,7 +292,7 @@ wheels = [
 [[package]]
 name = "deploy-your-startup-cli"
 version = "0.1.12.dev12+gb5fd2595b"
-source = { git = "https://github.com/Deploy-your-Startup/cli.git?rev=b5fd2595b01f58d726fbb91fc3159b2a2546187e#b5fd2595b01f58d726fbb91fc3159b2a2546187e" }
+source = { git = "https://github.com/Deploy-your-Startup/cli.git?rev=b7b467d2613d0c1113519442bcae82f542a8c6d3#b7b467d2613d0c1113519442bcae82f542a8c6d3" }
 dependencies = [
     { name = "ansible" },
     { name = "click" },
@@ -314,7 +314,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "deploy-your-startup-cli", git = "https://github.com/Deploy-your-Startup/cli.git?rev=b5fd2595b01f58d726fbb91fc3159b2a2546187e" }]
+requires-dist = [{ name = "deploy-your-startup-cli", git = "https://github.com/Deploy-your-Startup/cli.git?rev=b7b467d2613d0c1113519442bcae82f542a8c6d3" }]
 
 [[package]]
 name = "dunamai"
