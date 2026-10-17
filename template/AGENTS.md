@@ -22,12 +22,10 @@ or persist decrypted secrets. Ask before destructive restore or secret rotation.
 
 ## Testing
 
-**Integration tests are the default; changed user flows require E2E tests.**
-Unit tests are reserved for complex algorithms and supplement these tests.
-Every behaviour
-change ships with an integration test; changed user flows also get browser E2E.
-Exercise the real application, PostgreSQL and service boundaries. Do not mock
-our own code. Use a local stand-in for an external service (ADR 0001).
+Follow [Testing policy and completion evidence](docs/testing-policy.md) and
+[ADR 0001](docs/architecture/0001-test-strategy.md). Exercise the real
+application, PostgreSQL and service boundaries; changed user flows get browser
+E2E.
 
 - **GIVEN:** arrange the relevant state explicitly with factories or real write
   endpoints. Name the scenario-specific values in the test.
@@ -102,13 +100,13 @@ Record decisions that shape the project as numbered ADRs in
 From the repo root with a clean working tree:
 
 ```bash
-startup template update --version main --dry-run
-startup template update --version main
+startup template update --version <release-tag> --dry-run
+startup template update --version <release-tag>
 ```
 
 Review the diff, resolve conflicts, run affected lint/tests/E2E, then commit
 including `.copier-answers.yml`. A separate branch is optional; Copier does
-not commit, push or deploy. Use a tag/commit instead of `main` for a fixed target.
+not commit, push or deploy.
 Do not edit Copier answers manually. Existing deployment/group_vars files are
 preserved. `startup sync` handles shared deployment roles/workflows separately.
 
@@ -118,15 +116,6 @@ preserved. `startup sync` handles shared deployment roles/workflows separately.
 - Local `./make.sh test` and browser runs do not measure coverage by default. Generated backend pipelines set `require_coverage: true`; missing or invalid reports fail CI. No percentage threshold is enforced.
 - Measure integration and E2E tests, never add unit tests for coverage.
 - See [Testing](docs/testing.md) for commands and pipeline reports.
-
-## Test coverage and completion claims
-
-Follow [Testing policy and completion evidence](docs/testing-policy.md).
-Keep integration tests as the default and E2E coverage for changed user flows.
-A green pipeline confirms the executed checks; smoke tests and skipped provider
-checks do not establish full feature coverage. Record uncovered flows and report
-remaining gaps when completing work. Never remove required E2E scenarios to
-improve deployment speed.
 
 ## Legal information and optional tracking
 
@@ -138,18 +127,6 @@ and consent revision when purposes change. Never invent operator details or mark
 unreviewed placeholders as complete. Test no tracking before permission, after
 rejection and after withdrawal, plus public legal links.
 
-### Required onboarding before public launch
-
-When creating any startup for a user, include legal setup in onboarding before
-public launch: collect only missing, publication-approved operator name, postal
-address and contact details, and prepare a privacy notice matching the actual
-hosting, login, analytics and other data processing. Generic template text is a
-draft, not a completed notice. Ask for missing details together; never infer a
-private address or reuse another operator's information. Keep optional analytics
-disabled until disclosures are completed and reviewed. Track missing information
-explicitly and do not describe a startup as ready for public launch while this
-work is outstanding. This applies to portfolio startups and external users,
-including pitch sites even when their template has no built-in legal pages.
-Use supported site-policy configuration and checks where available; otherwise
-add the required project pages and record the gap. No extra consent-service
-account is required by the standard workflow.
+Before a public launch, collect the missing publication-approved operator
+details together and review the disclosures; until then the startup is not
+ready for launch and optional analytics stay off.
