@@ -33,8 +33,7 @@ with tempfile.TemporaryDirectory() as temporary:
     assert backend_job["with"]["run_tests"] is True
     assert backend_job["with"]["require_coverage"] is True
     assert backend_job["with"]["coverage_measured_from"] == "Integration"
-    assert "coverage/cobertura.xml" in (generated / "AGENTS.md").read_text()
-    assert (generated / "docs/testing.md").is_file()
+    assert "coverage/cobertura.xml" in (generated / "docs/testing.md").read_text()
     assert not (generated / "docs/architecture/0007-coverage-report-contract.md").exists()
     playbook = yaml.safe_load((generated / "deployment/playbook.yml").read_text())
     tasks = [task for play in playbook for task in play.get("tasks", [])]
