@@ -45,6 +45,8 @@ E2E.
   rate-limit login and registration where the app handles credentials.
 - Verify production HTTPS, Secure/HttpOnly session cookies and HSTS through the
   actual ingress; trust forwarded headers only from the trusted proxy.
+- Before declaring a launch complete, verify live CSS/JS and a core user flow;
+  HTTP 200 alone is insufficient.
 - Public links expose only explicitly approved data, never login identities,
   secrets or source uploads. `noindex` is not access control. Verify live behaviour
   separately from local tests before calling a release safe to share.
