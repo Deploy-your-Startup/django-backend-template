@@ -93,3 +93,8 @@ ignore = ["E501", "ANN401", "ANN202"]
 "**/*_test.py" = ["ANN"]
 "**/tests/**" = ["ANN"]
 "e2e_support/**" = ["ANN"]
+
+# Django, DRF and factory_boy declare options in a nested `class Meta`, which ty
+# reports as an incompatible override of the parent class's `Meta`.
+[tool.ty.rules]
+invalid-attribute-override = "ignore"

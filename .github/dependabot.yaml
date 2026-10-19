@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: pip
     directories:
-      - /deployment
+      - /template/deployment
     schedule:
       interval: weekly
     groups:
@@ -13,7 +13,7 @@ updates:
         
   - package-ecosystem: uv
     directories:
-      - /backend
+      - /template/backend
     schedule:
       interval: weekly
     groups:
@@ -24,7 +24,7 @@ updates:
 
   - package-ecosystem: docker
     directories:
-      - /backend
+      - /template/backend
     schedule:
       interval: weekly
 
