@@ -54,5 +54,5 @@ and arrive through template updates; number project ADRs from 0100 upward.
 
 ## Project notes
 
-Record project-specific rules here as short pointers to project ADRs (0100+)
-or docs, not as long explanations.
+List project ADRs (0100+) under Architecture decisions above; keep any other
+project rule here as a short pointer to its doc.
