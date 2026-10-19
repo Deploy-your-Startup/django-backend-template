@@ -16,7 +16,7 @@ through mise. Formatting may write; lint must only check. Do not add git hooks.
 ## Generated project harness
 
 Generated projects carry their own agent instructions: template/AGENTS.md,
-template/CLAUDE.md, .github/git-commit-instructions.md and the ADRs in
+.github/git-commit-instructions.md and the ADRs in
 template/docs/architecture/. Treat them as part of the product. Keep the
 template's own code compliant with them (the linters enforce what they can),
 add an ADR when the template makes a new structural decision, and keep the

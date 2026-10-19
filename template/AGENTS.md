@@ -99,6 +99,7 @@ number project ADRs from 0100 upward. Never reuse or renumber a template ADR.
 - [ADR 0005](docs/architecture/0005-service-command-contract.md) — load when adding a service or changing make.sh, mise tasks or CI.
 - [ADR 0006](docs/architecture/0006-business-logic-in-services.md) — load when adding business rules, queries, transactions or an entry point.
 - [ADR 0008](docs/architecture/0008-local-consent.md) — load when adding analytics, cookies, external services or personal-data processing.
+- [ADR 0009](docs/architecture/0009-monorepo.md) — load when adding a service, moving code between services or splitting the repository.
 
 ## Template updates (Copier)
 
