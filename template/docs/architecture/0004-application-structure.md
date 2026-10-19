@@ -19,7 +19,7 @@ flowchart LR
 ```
 
 1. **One repository** holds every service (`backend`, `e2e_tests`,
-   `deployment`). A feature and its tests are one commit and one review.
+   `deployment`). A feature and its tests are one commit and one review. See ADR 0009.
 2. **Django and FastAPI in one ASGI application.** Django provides the ORM,
    migrations, admin and server-rendered pages (with HTMX for interactions);
    FastAPI provides typed HTTP routes under `/api` and the OpenAPI schema.
