@@ -60,7 +60,17 @@ with tempfile.TemporaryDirectory() as temporary:
             if linked.parent == project / "docs/architecture":
                 linked_adrs.add(linked)
     exported_adrs = set((project / "docs/architecture").glob("*.md"))
-    assert exported_adrs == linked_adrs, "Every exported ADR needs an AGENTS.md entry"
+    assert exported_adrs <= linked_adrs, "Every exported ADR needs a resolving link"
+    # The index section, not any link in AGENTS.md, makes an ADR discoverable.
+    index = re.search(r"^## Architecture decisions$(.*?)(?=^## |\Z)", instructions, re.MULTILINE | re.DOTALL)
+    assert index, "AGENTS.md needs an '## Architecture decisions' section"
+    indexed = {(project / target).resolve() for target in re.findall(r"\]\((docs/architecture/[^)#]+)", index.group(1))}
+    assert exported_adrs == indexed, "Every exported ADR needs an entry under '## Architecture decisions'"
+    # Template ADRs stay below 0100 so generated projects can number their own from 0100.
+    assert all(int(path.name[:4]) < 100 for path in exported_adrs), "Template ADRs use 0001-0099"
+    # The generated project carries the ADR check that guards later template updates.
+    import subprocess
+    subprocess.run([sys.executable, "tests/test_agent_links_integration.py"], cwd=project, check=True)
     test_adrs = [path for path in exported_adrs if path.name.endswith("test-strategy.md")]
     assert len(test_adrs) == 1
     assert "docs/testing-policy.md" in instructions

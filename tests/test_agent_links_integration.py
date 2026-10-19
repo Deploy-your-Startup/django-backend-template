@@ -1,7 +1,8 @@
 """GIVEN the real Markdown instructions, WHEN following every relative link, THEN each target exists.
 
 Agent instructions stay short by linking to the documents that hold the details.
-This check keeps those links working; it deliberately asserts no wording.
+This check keeps those links working and the ADR index complete; it deliberately
+asserts no wording beyond the ADR headings.
 """
 
 import re
@@ -12,6 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIPPED_DIRECTORIES = {".git", "node_modules", ".venv", "dist", "build", ".pytest_cache"}
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 IMPORT = re.compile(r"^@(\S+)$", re.MULTILINE)
+ADR_NAME = re.compile(r"^(\d{4})-[a-z0-9-]+\.md$")
+ADR_INDEX = re.compile(r"^## Architecture decisions$(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
+ADR_HEADINGS = ("## Context", "## Decision", "## Consequences", "## Alternatives considered")
 
 
 def markdown_files():
@@ -53,8 +57,56 @@ def test_agent_instructions_link_the_testing_policy():
         )
 
 
+def architecture_decision_problems(directory):
+    instructions = directory.parent.parent / "AGENTS.md"
+    records = sorted(directory.glob("*.md"))
+    numbers = {}
+    for record in records:
+        name = ADR_NAME.match(record.name)
+        if not name:
+            yield f"{record.relative_to(ROOT)}: name it NNNN-short-title.md"
+            continue
+        numbers.setdefault(name.group(1), []).append(record.name)
+        text = record.read_text()
+        if not re.search(r"^\*\*Status\*\*: \S", text, re.MULTILINE):
+            yield f"{record.relative_to(ROOT)}: missing '**Status**: <status>' line"
+        for heading in ADR_HEADINGS:
+            if not re.search(rf"^{re.escape(heading)}$", text, re.MULTILINE):
+                yield f"{record.relative_to(ROOT)}: missing '{heading}' section"
+    for number, names in numbers.items():
+        if len(names) > 1:
+            yield f"ADR {number} is used more than once: {', '.join(names)}"
+    index = ADR_INDEX.search(instructions.read_text()) if instructions.exists() else None
+    if not index:
+        yield f"{instructions.relative_to(ROOT)}: missing '## Architecture decisions' section"
+        return
+    listed = {(instructions.parent / target.split("#", 1)[0]).resolve() for target in LINK.findall(index.group(1))}
+    for record in records:
+        if record.resolve() not in listed:
+            yield f"{record.relative_to(ROOT)} is not listed under '## Architecture decisions'"
+
+
+def test_architecture_decisions_are_unique_complete_and_listed():
+    # GIVEN every docs/architecture directory next to an AGENTS.md, including
+    # template ADRs (0001-0099) and project ADRs (0100 and up) side by side.
+    directories = [
+        directory
+        for directory in sorted(ROOT.rglob("docs/architecture"))
+        if directory.is_dir() and not SKIPPED_DIRECTORIES.intersection(directory.relative_to(ROOT).parts)
+    ]
+    # WHEN checking their names, headings and the AGENTS.md index.
+    problems = [problem for directory in directories for problem in architecture_decision_problems(directory)]
+    # THEN numbers are unique, each record is complete and every record is
+    # listed, so a template update cannot silently collide with a project ADR.
+    assert not problems, "Architecture decision problems:\n" + "\n".join(problems)
+
+
 if __name__ == "__main__":
-    for check in (test_relative_links_resolve, test_agent_instructions_link_the_testing_policy):
+    for check in (
+        test_relative_links_resolve,
+        test_agent_instructions_link_the_testing_policy,
+        test_architecture_decisions_are_unique_complete_and_listed,
+    ):
         check()
-    print("Agent instruction links resolve and delegate to the testing policy.")
+    print("Agent instruction links resolve, delegate to the testing policy and list every ADR.")
     sys.exit(0)
