@@ -20,7 +20,9 @@ template/CLAUDE.md, .github/git-commit-instructions.md and the ADRs in
 template/docs/architecture/. Treat them as part of the product. Keep the
 template's own code compliant with them (the linters enforce what they can),
 add an ADR when the template makes a new structural decision, and keep the
-ADR list in template/AGENTS.md in sync. CI checks that they ship.
+ADR list in template/AGENTS.md in sync. Template ADRs use numbers 0001-0099;
+0100 and up belong to generated projects (ADR 0003). CI checks that they ship,
+are listed and that the generated project carries the same ADR check.
 Carry recurring application fixes into this foundation with a regression check;
 keep generated instructions concise and preserve application customizations.
 

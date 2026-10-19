@@ -88,7 +88,9 @@ own data and row invariants. Avoid a single project-wide service collection.
 ## Architecture decisions
 
 Record decisions that shape the project as numbered ADRs in
-`docs/architecture/` and list them here with when to load them.
+`docs/architecture/` and list them here with when to load them (ADR 0003).
+Numbers 0001-0099 belong to the template and arrive through template updates;
+number project ADRs from 0100 upward. Never reuse or renumber a template ADR.
 
 - [ADR 0001](docs/architecture/0001-test-strategy.md) — load when writing integration or E2E scenarios; includes GIVEN / WHEN / THEN and isolation.
 - [ADR 0002](docs/architecture/0002-explicit-types.md) — load when adding or changing production functions.
@@ -96,6 +98,7 @@ Record decisions that shape the project as numbered ADRs in
 - [ADR 0004](docs/architecture/0004-application-structure.md) — load for topology, stack, authentication or database choices.
 - [ADR 0005](docs/architecture/0005-service-command-contract.md) — load when adding a service or changing make.sh, mise tasks or CI.
 - [ADR 0006](docs/architecture/0006-business-logic-in-services.md) — load when adding business rules, queries, transactions or an entry point.
+- [ADR 0008](docs/architecture/0008-local-consent.md) — load when adding analytics, cookies, external services or personal-data processing.
 
 ## Template updates (Copier)
 
