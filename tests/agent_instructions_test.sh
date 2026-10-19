@@ -45,7 +45,8 @@ with tempfile.TemporaryDirectory() as temporary:
     assert (project / "docs/privacy.md").is_file()
 
     instructions = (project / "AGENTS.md").read_text()
-    assert "@AGENTS.md" in (project / "CLAUDE.md").read_text().splitlines()
+    assert instructions.strip(), "AGENTS.md must contain the project instructions"
+    assert not (project / "CLAUDE.md").exists(), "Generated projects use AGENTS.md"
 
     # All local links resolve inside the generated project, not the source repo.
     linked_adrs = set()

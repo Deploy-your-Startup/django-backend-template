@@ -50,7 +50,8 @@ jobs:
       - name: Check that agent instructions ship with the project
         working-directory: ../generated
         run: |
-          grep -qx '@AGENTS.md' CLAUDE.md
+          test -s AGENTS.md
+          test ! -e CLAUDE.md
           test -f .github/git-commit-instructions.md
           adrs=$(grep -o 'docs/architecture/[^)]*\.md' AGENTS.md)
           test -n "$adrs"
