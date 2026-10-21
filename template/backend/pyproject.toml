@@ -5,15 +5,15 @@ description = ""
 requires-python = "~=3.14.0"
 dependencies = [
     "dj-database-url>=3.1.2,<4",
-    "sentry-sdk>=2.71.0,<3",
-    "websockets~=17.1",
+    "sentry-sdk>=2.72.0,<3",
+    "websockets~=17.2",
     "redis>=8.1.0,<9",
     "async-timeout>=5.0.1,<6",
     "uvicorn[standard]>=0.54.0,<0.55",
-    "fastapi>=0.142.2,<0.143",
+    "fastapi>=0.143.3,<0.144",
     "pillow>=12.3.0,<13",
-    "django>=6.1.1",
-    "django-bootstrap5>=26.3",
+    "django>=6.1.2",
+    "django-bootstrap5>=26.4",
     "psycopg[binary]>=3.3.6",
 ]
 
