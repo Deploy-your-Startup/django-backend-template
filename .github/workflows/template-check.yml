@@ -27,8 +27,8 @@ jobs:
     env:
       DATABASE_URL: postgres://admin:admin@127.0.0.1:5432/template_check
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       - name: Check rendered deployment contract
         run: bash tests/render_roles_test.sh
       - name: Test optional local coverage contract
@@ -62,7 +62,7 @@ jobs:
       - name: Test generated backend
         working-directory: ../generated/backend
         run: ./make.sh coverage
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
       - name: Install browser test dependencies
