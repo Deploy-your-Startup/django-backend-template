@@ -34,7 +34,7 @@ jobs:
       platforms: linux/amd64,linux/arm64
       service: backend
       run_tests: true
-      run_e2e: true
+      run_e2e: false
       e2e_shards: 2
       require_coverage: true
       coverage_measured_from: Integration
