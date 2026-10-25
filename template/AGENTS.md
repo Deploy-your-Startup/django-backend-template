@@ -35,8 +35,8 @@ decrypted secrets. Ask before destructive restores or secret rotation.
 - Use descriptive names; booleans start with `is`, `has`, `can` or `should`.
 - Never push directly to `main`; open a pull request with an English title and
   description.
-- Before finishing, run lint and tests for every changed service and E2E for
-  user-visible changes.
+- Before completing code changes, run lint and all tests locally: integration,
+  existing unit and browser E2E. Record failures and skips; CI does not replace this.
 - Before committing, check `git status --short --ignored` for files you created:
   a passing local run proves nothing if CI checks out without an ignored file.
 
