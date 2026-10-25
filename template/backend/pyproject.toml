@@ -26,7 +26,7 @@ dev = [
     # Exact pin, not a range: ty is 0.0.x and explicitly has no stable API —
     # diagnostics can change between any two releases. Since it blocks the
     # lint gate, an unpinned bump would turn every pipeline red at once.
-    "ty==0.0.89",
+    "ty==0.0.90",
     # Teaches every type checker what Django generates at runtime (`objects`,
     # field types). Without it ty reports `Model has no attribute "objects"`
     # on every query. Reverse relations from `related_name` still need explicit
