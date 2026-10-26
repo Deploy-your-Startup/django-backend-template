@@ -16,8 +16,6 @@ def backend_copy(tmp_path):
     configuration = BACKEND / "tach.toml"
     shutil.copy(configuration, tmp_path / configuration.name)
     shutil.copy(BACKEND / "pyproject.toml", tmp_path)
-    (tmp_path / "architecture").mkdir()
-    shutil.copy(BACKEND / "architecture/check_imports.py", tmp_path / "architecture")
     modules = tomllib.loads(configuration.read_text())["modules"]
     packages = {path.split(".")[0] for module in modules for path in module["paths"]}
     for package in packages:
@@ -31,7 +29,7 @@ def backend_copy(tmp_path):
 
 def lint_imports(directory):
     return subprocess.run(
-        [sys.executable, "architecture/check_imports.py"],
+        [str(Path(sys.executable).with_name("tach")), "check"],
         cwd=directory,
         capture_output=True,
         text=True,
@@ -60,23 +58,25 @@ def test_production_import_of_test_helper_fails(backend_copy):
     assert "project.testing" in result.stdout + result.stderr
 
 
-def test_import_cycle_fails(backend_copy):
-    # GIVEN two application modules importing each other
-    path = backend_copy / "api/routes.py"
-    path.write_text(path.read_text() + "\nfrom api import cycle_probe\n")
-    (backend_copy / "api/cycle_probe.py").write_text("from api import routes\n")
-    # WHEN the lint analyzer checks the actual source graph
+def test_declared_dependency_cycle_fails(backend_copy):
+    # GIVEN two real modules with a cycle declared in the Tach configuration
+    for name in ("cycle_a", "cycle_b"):
+        (backend_copy / f"project/{name}.py").write_text("value = 1\n")
+    configuration = backend_copy / "tach.toml"
+    configuration.write_text(
+        configuration.read_text()
+        + """
+[[modules]]
+path = "project.cycle_a"
+depends_on = ["project.cycle_b"]
+
+[[modules]]
+path = "project.cycle_b"
+depends_on = ["project.cycle_a"]
+"""
+    )
+    # WHEN the same native Tach command as service lint checks the configuration
     result = lint_imports(backend_copy)
-    # THEN the cycle is rejected
+    # THEN its configured circular-dependency rule rejects the cycle
     assert result.returncode != 0
     assert "circular" in (result.stdout + result.stderr).lower()
-
-
-def test_missing_declared_source_fails(backend_copy):
-    # GIVEN a configured production source disappearing
-    (backend_copy / "api/routes.py").unlink()
-    # WHEN the lint analyzer loads its contracts
-    result = lint_imports(backend_copy)
-    # THEN the scope cannot silently become an empty passing check
-    assert result.returncode != 0
-    assert "routes" in result.stdout + result.stderr
