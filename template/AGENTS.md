@@ -43,19 +43,6 @@ decrypted secrets. Ask before destructive restores or secret rotation.
 Read `run_e2e` in `.github/workflows/`: `false` means local E2E only,
 `true` also runs it in CI. Dependabot PRs always run E2E in CI.
 
-## Visual evidence in pull requests
-
-For visible UI changes, capture before/after screenshots of the actual running
-application when feasible. Use the same viewport, data and UI state so the
-change is easy to compare; use desktop by default and include mobile when the
-change affects it. Use demo data and redact sensitive information.
-
-Embed both images in the pull request. Caption each with Before or After, the
-screen, viewport dimensions and what changed. If a comparison is impractical,
-state what is missing, why, and what you verified instead. Documentation-only
-and nonvisual changes do not need screenshots. Screenshots complement the
-required integration and E2E checks.
-
 ## Architecture decisions
 
 Load an ADR when its topic comes up. Numbers 0001-0099 belong to the template
