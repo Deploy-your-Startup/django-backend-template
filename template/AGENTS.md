@@ -57,6 +57,7 @@ and arrive through template updates; number project ADRs from 0100 upward.
 - [ADR 0008](docs/architecture/0008-local-consent.md) — analytics, cookies, external services or personal data.
 - [ADR 0009](docs/architecture/0009-monorepo.md) — adding a service, moving code or splitting the repository.
 - [ADR 0010](docs/architecture/0010-tests-as-specification.md) — specifying behaviour, writing a task or adding a requirement.
+- [ADR 0011](docs/architecture/0011-module-boundaries.md) — pragmatic module boundaries, allowed Django relationships and architecture checks.
 
 ## Project notes
 

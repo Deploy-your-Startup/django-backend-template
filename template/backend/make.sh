@@ -125,6 +125,7 @@ if [ "${1:-}" == "lint" ]; then
     uv run --group dev ruff format --check
     uv run --group dev ruff check
     uv run --group dev ty check
+    uv run --group dev python architecture/check_imports.py
 fi
 
 if [ "${1:-}" == "restore_local" ]; then

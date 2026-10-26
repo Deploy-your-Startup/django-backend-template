@@ -19,6 +19,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "tach==0.35.3",
     # Pinned to a minor series: ruff's *default* rule set grows with releases,
     # and `./make.sh lint` gates CI, so an unpinned bump could flood a project
     # with errors nobody introduced. Bump deliberately, then `./make.sh format`.
@@ -50,6 +51,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
+# Use Tach only for lint; keep the complete pytest suite active.
+addopts = "-p no:tach"
 DJANGO_SETTINGS_MODULE = "project.settings"
 python_files = ["tests.py", "test_*.py", "*_test.py"]
 asyncio_mode = "auto"
