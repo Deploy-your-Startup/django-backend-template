@@ -1,0 +1,14 @@
+# Extend these module scopes when adding apps or layers (ADR 0011).
+source_roots = ["."]
+exclude = [".venv/**", "architecture/**", "**/__pycache__/**"]
+ignore_type_checking_imports = false
+forbid_circular_dependencies = true
+layers = ["entrypoints", "services", "models", "contracts"]
+
+[[modules]]
+paths = ["api.**", "project.**", "docker_database_url.**"]
+
+[[modules]]
+paths = ["api.routes", "project.asgi", "project.settings", "project.urls", "project.wsgi", "project.htmx", "project.images"]
+cannot_depend_on = ["api.test_legal_integration", "api.tests", "project.test_images", "project.test_testing_integration", "project.testing"]
+

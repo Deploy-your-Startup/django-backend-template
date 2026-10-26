@@ -3,6 +3,7 @@
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -12,19 +13,25 @@ BACKEND = Path(__file__).resolve().parents[1]
 
 @pytest.fixture
 def backend_copy(tmp_path):
-    for name in ("api", "project", "docker_database_url"):
+    configuration = BACKEND / "tach.toml"
+    shutil.copy(configuration, tmp_path / configuration.name)
+    shutil.copy(BACKEND / "pyproject.toml", tmp_path)
+    (tmp_path / "architecture").mkdir()
+    shutil.copy(BACKEND / "architecture/check_imports.py", tmp_path / "architecture")
+    modules = tomllib.loads(configuration.read_text())["modules"]
+    packages = {path.split(".")[0] for module in modules for path in module["paths"]}
+    for package in packages:
         shutil.copytree(
-            BACKEND / name,
-            tmp_path / name,
+            BACKEND / package,
+            tmp_path / package,
             ignore=shutil.ignore_patterns("__pycache__"),
         )
-    shutil.copy(BACKEND / "pyproject.toml", tmp_path)
     return tmp_path
 
 
 def lint_imports(directory):
     return subprocess.run(
-        [str(Path(sys.executable).with_name("lint-imports")), "--no-cache"],
+        [sys.executable, "architecture/check_imports.py"],
         cwd=directory,
         capture_output=True,
         text=True,
@@ -39,8 +46,7 @@ def test_shipped_application_passes(backend_copy):
     result = lint_imports(backend_copy)
     # THEN it passes a populated graph
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "0 broken" in result.stdout
-    assert "Analyzed 0 files" not in result.stdout
+    assert "All modules validated" in result.stdout + result.stderr
 
 
 def test_production_import_of_test_helper_fails(backend_copy):
@@ -51,7 +57,7 @@ def test_production_import_of_test_helper_fails(backend_copy):
     result = lint_imports(backend_copy)
     # THEN the production-to-test contract fails
     assert result.returncode != 0
-    assert "Production code does not import test helpers BROKEN" in result.stdout
+    assert "project.testing" in result.stdout + result.stderr
 
 
 def test_import_cycle_fails(backend_copy):
@@ -63,7 +69,7 @@ def test_import_cycle_fails(backend_copy):
     result = lint_imports(backend_copy)
     # THEN the cycle is rejected
     assert result.returncode != 0
-    assert "Application packages have no sibling import cycles BROKEN" in result.stdout
+    assert "circular" in (result.stdout + result.stderr).lower()
 
 
 def test_missing_declared_source_fails(backend_copy):

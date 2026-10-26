@@ -19,7 +19,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "import-linter==2.11",
+    "tach==0.35.3",
     # Pinned to a minor series: ruff's *default* rule set grows with releases,
     # and `./make.sh lint` gates CI, so an unpinned bump could flood a project
     # with errors nobody introduced. Bump deliberately, then `./make.sh format`.
@@ -51,6 +51,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
+# Use Tach only for lint; keep the complete pytest suite active.
+addopts = "-p no:tach"
 DJANGO_SETTINGS_MODULE = "project.settings"
 python_files = ["tests.py", "test_*.py", "*_test.py"]
 asyncio_mode = "auto"
@@ -99,18 +101,3 @@ ignore = ["E501", "ANN401", "ANN202"]
 # reports as an incompatible override of the parent class's `Meta`.
 [tool.ty.rules]
 invalid-attribute-override = "ignore"
-
-# Extend these concrete scopes when adding application packages (ADR 0011).
-[tool.importlinter]
-root_packages = ["api", "project", "docker_database_url"]
-
-[[tool.importlinter.contracts]]
-name = "Application packages have no sibling import cycles"
-type = "acyclic_siblings"
-ancestors = ["api", "project"]
-
-[[tool.importlinter.contracts]]
-name = "Production code does not import test helpers"
-type = "forbidden"
-source_modules = ["api.routes", "project.asgi", "project.settings", "project.urls", "project.wsgi", "project.htmx", "project.images"]
-forbidden_modules = ["api.tests", "project.testing", "project.test_images", "project.test_testing_integration", "api.test_legal_integration"]

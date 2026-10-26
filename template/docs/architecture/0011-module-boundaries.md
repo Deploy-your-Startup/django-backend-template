@@ -12,7 +12,7 @@ Build one application organized by business capability. Entry points call
 services (ADR 0006); models must not import services or entry points. Cross-app
 model references, joins and shared transactions are allowed.
 
-Ship pinned Import Linter checks for Python and Dependency Cruiser for Vue.
+Ship pinned Tach checks for Python and Dependency Cruiser for Vue.
 `make.sh lint` checks cycles, production-to-test imports and existing layers.
 Extend the starter configurations when adding apps or layers. Regression tests
 exercise the real analyzers with allowed and forbidden imports.
