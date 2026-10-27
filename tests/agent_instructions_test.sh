@@ -38,10 +38,16 @@ with tempfile.TemporaryDirectory() as temporary:
     assert policy["reviewed"] is False and policy["analytics"] == "off"
     policy["operatorName"] = "Example Operator"
     policy_path.write_text(json.dumps(policy))
+    product_path = project / "docs/product.md"
+    assert "# instructions-check product" in product_path.read_text()
+    product_path.write_text(product_path.read_text().replace(
+        "Describe the product in two or three sentences, from the user's side.", "Friends draw a game."))
     copier.run_copy(str(source), str(project), defaults=True, quiet=True, overwrite=True,
                     data={"project_name": "instructions-check",
                           "base_domain": "example.com", "github_username": "example"})
     assert json.loads(policy_path.read_text())["operatorName"] == "Example Operator"
+    assert "Friends draw a game." in product_path.read_text()
+    assert "docs/product.md" in (project / "AGENTS.md").read_text()
     assert (project / "docs/privacy.md").is_file()
 
     instructions = (project / "AGENTS.md").read_text()

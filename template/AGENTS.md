@@ -21,6 +21,7 @@ decrypted secrets. Ask before destructive restores or secret rotation.
 
 | Topic | Source |
 |---|---|
+| Product, audience and scope | [Product](docs/product.md) |
 | Tests and completion claims | [Testing policy](docs/testing-policy.md), [ADR 0001](docs/architecture/0001-test-strategy.md), [coverage](docs/testing.md) |
 | Security before public sharing | [Security checklist](docs/security.md) |
 | Legal pages, consent, analytics | [Privacy](docs/privacy.md), [ADR 0008](docs/architecture/0008-local-consent.md) |

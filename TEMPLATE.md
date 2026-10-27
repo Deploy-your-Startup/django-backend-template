@@ -11,6 +11,8 @@ override. Shared helpers cover HTMX responses, image resizing/compression and
 isolated upload tests. Keep business logic in services and views thin.
 
 `deployment/group_vars/*.yml` seeds a new project but is preserved on updates.
+`docs/product.md` seeds the owner's product description the same way; agents
+find it through AGENTS.md and the link check keeps its sections.
 Copier answers contain only public parameters, never tokens or private keys.
 Vault encryption and provisioning remain the responsibility of startup CLI.
 
