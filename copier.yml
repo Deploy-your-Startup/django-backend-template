@@ -26,6 +26,8 @@ _exclude:
   - '**/playwright-report'
 _skip_if_exists:
   - backend/project/site-policy.json
+  # The owner describes the product once; updates never rewrite it.
+  - docs/product.md
   # These files contain project-specific infrastructure and vaulted secrets.
   # Seed new projects once; never rewrite existing files during an update.
   - deployment/group_vars/*.yml

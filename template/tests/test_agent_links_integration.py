@@ -16,6 +16,7 @@ IMPORT = re.compile(r"^@(\S+)$", re.MULTILINE)
 ADR_NAME = re.compile(r"^(\d{4})-[a-z0-9-]+\.md$")
 ADR_INDEX = re.compile(r"^## Architecture decisions$(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
 ADR_HEADINGS = ("## Context", "## Decision", "## Consequences", "## Alternatives considered")
+PRODUCT_HEADINGS = ("## What it is", "## Who it's for", "## What it does today", "## Not building", "## Open questions")
 
 
 def markdown_files():
@@ -55,6 +56,19 @@ def test_agent_instructions_link_the_testing_policy():
         assert "](docs/testing-policy.md)" in instructions.read_text(), (
             f"{instructions.relative_to(ROOT)} must link docs/testing-policy.md"
         )
+
+
+def test_agent_instructions_link_the_product_description():
+    # GIVEN the project's agent entrypoint,
+    # WHEN looking for the product description it delegates to,
+    # THEN it links docs/product.md and that file keeps its sections, so agents
+    # judge features and ideas against what the product is and whom it serves.
+    instructions = ROOT / "AGENTS.md"
+    product = ROOT / "docs/product.md"
+    assert "](docs/product.md)" in instructions.read_text(), "AGENTS.md must link docs/product.md"
+    text = product.read_text()
+    missing = [heading for heading in PRODUCT_HEADINGS if not re.search(rf"^{re.escape(heading)}$", text, re.MULTILINE)]
+    assert not missing, f"docs/product.md is missing: {', '.join(missing)}"
 
 
 def architecture_decision_problems(directory):
@@ -105,8 +119,9 @@ if __name__ == "__main__":
     for check in (
         test_relative_links_resolve,
         test_agent_instructions_link_the_testing_policy,
+        test_agent_instructions_link_the_product_description,
         test_architecture_decisions_are_unique_complete_and_listed,
     ):
         check()
-    print("Agent instruction links resolve, delegate to the testing policy and list every ADR.")
+    print("Agent instruction links resolve, delegate to the testing policy and product description and list every ADR.")
     sys.exit(0)
