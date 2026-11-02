@@ -26,6 +26,11 @@ on:
         required: true
         default: production
 
+# Superseded PR checks can stop; pushes and manual deployments keep independent runs.
+concurrency:
+  group: pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-and-deploy:
     uses: §§deploy_your_startup.github_username§§/§§deploy_your_startup.deploy_repo_name§§/.github/workflows/build-and-deploy-service.yml@§§deploy_your_startup.deploy_ref§§
