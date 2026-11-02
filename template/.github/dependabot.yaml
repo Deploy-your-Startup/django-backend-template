@@ -1,31 +1,32 @@
 version: 2
 updates:
   - package-ecosystem: pip
+    open-pull-requests-limit: 2
     directories:
       - /deployment
     schedule:
       interval: weekly
     groups:
-      python-dev-dependencies:
-        dependency-type: development
-      python-prod-dependencies:
-        dependency-type: production
-        
+      routine-updates:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: uv
+    open-pull-requests-limit: 2
     directories:
       - /backend
     schedule:
       interval: weekly
     groups:
-      python-dev-dependencies:
-        dependency-type: development
-      python-prod-dependencies:
-        dependency-type: production
-
+      routine-updates:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: docker
+    open-pull-requests-limit: 2
+    groups:
+      routine-updates:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     directories:
       - /backend
     schedule:
       interval: weekly
-
-
