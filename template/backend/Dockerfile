@@ -1,5 +1,5 @@
 # Base image: Python slim with UV
-FROM python:3.14-slim AS builder
+FROM python:3.15-slim AS builder
 
 # Copy UV binaries from the official UV image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
