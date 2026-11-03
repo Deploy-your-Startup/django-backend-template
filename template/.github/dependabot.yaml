@@ -1,11 +1,12 @@
 version: 2
+# Batch routine updates monthly; security updates and automatic rebases stay enabled.
 updates:
   - package-ecosystem: pip
     open-pull-requests-limit: 2
     directories:
       - /deployment
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       routine-updates:
         patterns: ["*"]
@@ -15,7 +16,7 @@ updates:
     directories:
       - /backend
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       routine-updates:
         patterns: ["*"]
@@ -29,4 +30,4 @@ updates:
     directories:
       - /backend
     schedule:
-      interval: weekly
+      interval: monthly
