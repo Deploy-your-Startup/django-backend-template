@@ -14,7 +14,7 @@ dependencies = [
     "pillow>=13.0.0,<14",
     "django>=6.1.2",
     "django-bootstrap5>=26.4",
-    "psycopg[binary]>=3.3.6",
+    "psycopg[binary]>=3.3.8",
 ]
 
 [dependency-groups]
