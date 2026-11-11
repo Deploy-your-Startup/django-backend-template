@@ -74,7 +74,9 @@ jobs:
           node-version: '24'
       - name: Install browser test dependencies
         working-directory: ../generated/e2e_tests
-        run: npm ci && npx playwright install --with-deps chromium
+        # Hosted runners include Chromium libraries; avoid an unrelated apt/font download.
+        # Container E2E checks still install their complete OS dependencies.
+        run: npm ci && npx playwright install chromium
       - name: Check public contracts and inferred helper returns
         run: bash tests/typing_policy_integration_test.sh ../generated
       - name: Test the generated application in a browser
