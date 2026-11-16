@@ -12,4 +12,5 @@
   reviewable.
 - Use least privilege and safe defaults. Do not expose a service publicly
   without a documented reason.
-- Never hand-edit `.shared-roles`; refresh them with `startup sync`.
+- Never hand-edit `.shared-roles`; `./make.sh setup` refreshes them at the pinned
+  release and `./make.sh update` moves the project to a newer release.

@@ -40,8 +40,8 @@ case "$action" in
   restore)
     uv run --project "$script_dir" startup ansible restore --working-directory "$script_dir" "$@"
     ;;
-  sync)
-    uv run --project "$script_dir" startup sync "$@"
+  update)
+    uv run --project "$script_dir" startup update --working-directory "$script_dir" "$@"
     ;;
   secrets_update)
     uv run --project "$script_dir" startup secrets update -r "$script_dir" "$@"
