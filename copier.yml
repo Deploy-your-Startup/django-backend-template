@@ -44,13 +44,14 @@ additional_domains:
   type: str
   default: '[]'
   help: YAML list fragment (supplied by startup bootstrap)
-deploy_repo_name:
+deploy_repository:
   type: str
-  default: deploy-your-startup
+  default: Deploy-your-Startup/deploy
+  help: Repository with the shared deployment workflows, actions and roles
 deploy_ref:
   type: str
-  default: main
-  help: Reviewed shared deployment workflow ref
+  default: 64ec3a5f13de5328f02272cccaa3bcffde768fcf
+  help: Release commit of the shared deployment repository (v1.0.0)
 docker_registry_host:
   type: str
   default: 'ghcr.io/§§deploy_your_startup.github_username§§'

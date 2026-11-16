@@ -34,6 +34,6 @@ Integration tests use two pytest workers with independent databases. Set
 `TEST_WORKERS=0` for serial debugging. Browser reports remain separate from
 integration coverage in CI; percentages are never averaged.
 
-Existing projects first need the compatible shared parallel workflow in their
-owner deployment repository via `startup sync`. Application files are updated
+Existing projects first need a shared deployment release with the compatible
+parallel workflow: adopt it with `startup update`. Application files are updated
 separately with `startup template update`; preview both operations first.

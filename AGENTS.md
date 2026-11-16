@@ -31,10 +31,10 @@ keep generated instructions concise and preserve application customizations.
 Check README, agent instructions, metadata, license and public version refs
 together. Release only tested commits and pin consumer versions. Local checks
 do not prove successful cloud provisioning or production deployment.
-Use startup CLI for Vault, provisioning, deployment and shared-role sync.
+Use startup CLI for Vault, provisioning, deployment and shared-role updates.
 Never log or commit real credentials. Secret values use stdin and Keychain;
 preview changes with --dry-run. Ask before destructive or costly operations.
 
 Keep application template updates (startup template update) separate from
-shared deployment updates (startup sync). Preserve application customizations
+shared deployment updates (startup update). Preserve application customizations
 and deployment/group_vars. Never hand-edit deployment/.shared-roles.

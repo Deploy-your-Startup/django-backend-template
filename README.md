@@ -20,10 +20,10 @@ startup bootstrap --kind fullstack --provider hetzner --domain-owned \
 ```
 
 Use your own project name and domain. Verify GitHub Actions, DNS, HTTPS and the
-application health before calling the first deployment complete. For an existing
-owner deployment copy, preview and sync shared deployment `v0.1.5` before enabling
-this template's required CI coverage. `startup sync` updates shared deployments;
-`startup template update` updates application files.
+application health before calling the first deployment complete. Generated
+projects call `Deploy-your-Startup/deploy` (`deploy_repository`, or a fork) and are
+pinned to one of its releases (`deploy_ref`); `startup update` moves a project to a
+newer release and `startup template update` updates application files.
 
 This repository is not an application checkout. Generate a test project before
 running its service tasks. CI generates the project and checks backend lint,

@@ -3,8 +3,8 @@
 ## Quick Start
 
 ```bash
-# Sync the shared deploy repository into your GitHub account
-./make.sh sync
+# Move to the latest release of the shared deployment (Deploy-your-Startup/deploy)
+./make.sh update
 
 # Download shared roles and install deployment dependencies
 ./make.sh setup
