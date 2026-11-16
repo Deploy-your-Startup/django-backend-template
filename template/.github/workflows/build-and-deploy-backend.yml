@@ -34,6 +34,12 @@ concurrency:
 jobs:
   build-and-deploy:
     uses: §§deploy_your_startup.deploy_repository§§/.github/workflows/build-and-deploy-service.yml@§§deploy_your_startup.deploy_ref§§
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+      packages: write
+      id-token: write
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
       platforms: linux/amd64,linux/arm64
