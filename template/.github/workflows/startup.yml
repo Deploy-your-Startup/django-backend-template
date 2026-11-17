@@ -1,5 +1,5 @@
 name: Shared deployment version
-"on":
+'on':
   workflow_call:
     inputs:
       environment:
@@ -11,15 +11,15 @@ name: Shared deployment version
         description: Service to build and deploy (e.g., backend, frontend)
         required: false
         type: string
-        default: ""
+        default: ''
       services:
         description: Optional JSON array of service objects; one E2E gate protects all services
         type: string
-        default: ""
+        default: ''
       preflight_script:
         description: Optional repository-relative Bash check, run during preparation before build reuse
         type: string
-        default: ""
+        default: ''
       reuse_pr_build:
         description: Reuse a verified equivalent PR build on push; false forces fresh checks
         type: boolean
@@ -42,7 +42,7 @@ name: Shared deployment version
       coverage_measured_from:
         description: Test suites measured by the service coverage command (e.g. Integration)
         required: false
-        default: ""
+        default: ''
         type: string
       run_e2e:
         description: Gate deployment on the project's container E2E suite
@@ -64,7 +64,7 @@ name: Shared deployment version
       additional_build_context:
         description: key=path pairs for additional build contexts in docker e.g. shared=../shared
         required: false
-        default: ""
+        default: ''
         type: string
       operation:
         description: build, deploy or infrastructure
@@ -73,7 +73,7 @@ name: Shared deployment version
       health_url:
         description: Optional public HTTPS health endpoint checked after deployment
         type: string
-        default: ""
+        default: ''
     secrets:
       VAULT_PASSWORD:
         required: true
