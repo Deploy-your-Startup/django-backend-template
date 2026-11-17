@@ -24,7 +24,8 @@ with tempfile.TemporaryDirectory() as temporary:
     callers = [yaml.safe_load(path.read_text()) for path in workflows]
     shared_jobs = [job for workflow in callers for job in workflow.get("jobs", {}).values()
                    if job.get("uses", "").startswith("Deploy-your-Startup/deploy/")]
-    assert shared_jobs
+    assert len(shared_jobs) == 1
+    subprocess.run([sys.executable, str(root / "tests/deployment_version_check.py"), str(generated)], check=True)
     assert all(job["uses"].endswith("@codex/shared-cluster") for job in shared_jobs)
     assert not any("§§deploy_your_startup.deploy_ref§§" in path.read_text() for path in workflows)
     # GIVEN a real generated backend, WHEN CI calls the shared harness,
