@@ -23,6 +23,11 @@ updates:
         update-types: ["minor", "patch"]
   - package-ecosystem: docker
     open-pull-requests-limit: 2
+    # A new Python minor moves .python-version, requires-python and uv.lock
+    # together with the image; Dependabot would only change the image.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       routine-updates:
         patterns: ["*"]
