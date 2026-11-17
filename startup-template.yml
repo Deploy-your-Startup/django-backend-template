@@ -10,3 +10,6 @@ harness:
   - docs/operations.md
   - .github/git-commit-instructions.md
   - tests/test_agent_links_integration.py
+
+# Requires migration of the shared deployment before an application update.
+deployment_version: single
