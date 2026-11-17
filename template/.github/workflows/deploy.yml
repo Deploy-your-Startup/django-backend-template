@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/startup.yml'
       - deployment/**
       - '!deployment/shared-workflows.ref'
   workflow_dispatch:
@@ -19,8 +20,15 @@ on:
 
 jobs:
   deploy:
-    uses: §§deploy_your_startup.deploy_repository§§/.github/workflows/deploy.yml@§§deploy_your_startup.deploy_ref§§
+    uses: ./.github/workflows/startup.yml
     with:
+      operation: deploy
       environment: ${{ github.event.inputs.environment || inputs.environment }}
     secrets:
       VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+      packages: write
+      id-token: write

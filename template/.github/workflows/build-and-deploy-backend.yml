@@ -7,6 +7,7 @@ on:
   # gate would only run after the merge, which cannot block anything.
   pull_request:
     paths:
+      - '.github/workflows/startup.yml'
       - 'backend/**'
       - 'e2e_tests/**'
       - '.dockerignore'
@@ -15,6 +16,7 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/startup.yml'
       - 'backend/**'
       - 'e2e_tests/**'
       - '.dockerignore'
@@ -33,7 +35,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    uses: §§deploy_your_startup.deploy_repository§§/.github/workflows/build-and-deploy-service.yml@§§deploy_your_startup.deploy_ref§§
+    uses: ./.github/workflows/startup.yml
     permissions:
       contents: read
       actions: read
@@ -41,6 +43,7 @@ jobs:
       packages: write
       id-token: write
     with:
+      operation: build
       environment: ${{ github.event.inputs.environment || 'production' }}
       platforms: linux/amd64,linux/arm64
       service: backend
