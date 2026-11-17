@@ -1,5 +1,8 @@
 # Base image: Python slim with UV
-FROM python:3.15-slim AS builder
+# Keep this tag on backend/.python-version and requires-python; uv must not
+# fetch another interpreter, so a mismatch fails the build instead.
+FROM python:3.14-slim AS builder
+ENV UV_PYTHON_DOWNLOADS=never
 
 # Copy UV binaries from the official UV image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
