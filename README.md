@@ -33,3 +33,7 @@ The generated project's deployment version is configured once in
 `.github/workflows/startup.yml`. Other workflows and local CLI operations use
 that reference. `startup update` changes it; no separate role pin or checksum
 files are required. A successful Actions deployment run records execution.
+
+The CLI selects its tested template release by default; use `--template-version`
+to select another published release deliberately. Single-version deployment
+requires CLI v0.1.52 or newer.
