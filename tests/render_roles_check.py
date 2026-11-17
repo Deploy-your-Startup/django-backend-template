@@ -66,7 +66,8 @@ with tempfile.TemporaryDirectory() as temporary:
     assert f'requires-python = "~={python}.0"' in (generated / "backend/pyproject.toml").read_text()
     dependency = (generated / "deployment/pyproject.toml").read_text()
     assert 'rev = "7f8a113212aa27003713de3222966418bf848c9b"' in dependency
-    # GIVEN the rendered deployment, WHEN its real locked CLI is run,
-    # THEN SSH access and the cluster ownership guard work.
-    subprocess.run(["bash", str(generated / "deployment/tests/ssh-access-integration_test.sh")], check=True)
+    # GIVEN the rendered deployment, WHEN its locked CLI starts,
+    # THEN the deployment entrypoint loads. CLI behavior is tested in its own repo.
+    subprocess.run(["uv", "run", "--locked", "--project", str(generated / "deployment"),
+                    "startup", "ansible", "--help"], check=True, stdout=subprocess.DEVNULL)
     print("Real Copier render: pinned CLI, current Postgres and controller copies verified")
