@@ -1,0 +1,96 @@
+name: Shared deployment version
+'on':
+  workflow_call:
+    inputs:
+      environment:
+        description: Environment to deploy
+        required: false
+        default: production
+        type: string
+      service:
+        description: Service to build and deploy (e.g., backend, frontend)
+        required: false
+        type: string
+        default: ''
+      services:
+        description: Optional JSON array of service objects; one E2E gate protects all services
+        type: string
+        default: ''
+      preflight_script:
+        description: Optional repository-relative Bash check, run during preparation before build reuse
+        type: string
+        default: ''
+      reuse_pr_build:
+        description: Reuse a verified equivalent PR build on push; false forces fresh checks
+        type: boolean
+        default: true
+      run_tests:
+        description: Whether to run tests
+        required: false
+        default: true
+        type: boolean
+      run_lint:
+        description: Whether to run `./make.sh lint` before the tests. Off by default so a service that does not answer the `lint` verb yet keeps deploying; switch it on once its make.sh has one.
+        required: false
+        default: false
+        type: boolean
+      require_coverage:
+        description: Require a valid coverage/cobertura.xml from ./make.sh coverage
+        required: false
+        default: false
+        type: boolean
+      coverage_measured_from:
+        description: Test suites measured by the service coverage command (e.g. Integration)
+        required: false
+        default: ''
+        type: string
+      run_e2e:
+        description: Gate deployment on the project's container E2E suite
+        type: boolean
+        default: false
+      e2e_shards:
+        description: Number of isolated E2E jobs (1-8)
+        type: number
+        default: 1
+      e2e_directory:
+        description: Directory containing the E2E Dockerfile and compose.yml
+        type: string
+        default: e2e_tests
+      platforms:
+        description: "Comma\u2011separated list of target platforms (e.g. linux/amd64,linux/arm64)"
+        required: false
+        default: linux/amd64
+        type: string
+      additional_build_context:
+        description: key=path pairs for additional build contexts in docker e.g. shared=../shared
+        required: false
+        default: ''
+        type: string
+      operation:
+        description: build, deploy or infrastructure
+        type: string
+        required: true
+    secrets:
+      VAULT_PASSWORD:
+        required: true
+jobs:
+  runtime:
+    uses: §§deploy_your_startup.deploy_repository§§/.github/workflows/project.yml@§§deploy_your_startup.deploy_ref§§
+    with:
+      environment: ${{ inputs.environment }}
+      service: ${{ inputs.service }}
+      services: ${{ inputs.services }}
+      preflight_script: ${{ inputs.preflight_script }}
+      reuse_pr_build: ${{ inputs.reuse_pr_build }}
+      run_tests: ${{ inputs.run_tests }}
+      run_lint: ${{ inputs.run_lint }}
+      require_coverage: ${{ inputs.require_coverage }}
+      coverage_measured_from: ${{ inputs.coverage_measured_from }}
+      run_e2e: ${{ inputs.run_e2e }}
+      e2e_shards: ${{ inputs.e2e_shards }}
+      e2e_directory: ${{ inputs.e2e_directory }}
+      platforms: ${{ inputs.platforms }}
+      additional_build_context: ${{ inputs.additional_build_context }}
+      operation: ${{ inputs.operation }}
+    secrets:
+      VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}

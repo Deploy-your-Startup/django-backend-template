@@ -28,3 +28,8 @@ newer release and `startup template update` updates application files.
 This repository is not an application checkout. Generate a test project before
 running its service tasks. CI generates the project and checks backend lint,
 backend tests and the Playwright browser smoke test.
+
+The generated project's deployment version is configured once in
+`.github/workflows/startup.yml`. Other workflows and local CLI operations use
+that reference. `startup update` changes it; no separate role pin or checksum
+files are required. A successful Actions deployment run records execution.

@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory() as temporary:
     assert not any("§§deploy_your_startup.deploy_ref§§" in path.read_text() for path in workflows)
     # GIVEN a real generated backend, WHEN CI calls the shared harness,
     # THEN coverage is required and the portable instructions define its contract.
-    backend_job = next(job for job in shared_jobs if job.get("with", {}).get("service") == "backend")
+    backend_job = next(job for workflow in callers for job in workflow.get("jobs", {}).values() if job.get("with", {}).get("service") == "backend")
     # The shared build lives under another owner, so the caller grants what it nests.
     assert backend_job["permissions"] == {"contents": "read", "actions": "read", "pull-requests": "write", "packages": "write", "id-token": "write"}
     assert backend_job["with"]["run_tests"] is True
