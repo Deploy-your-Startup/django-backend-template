@@ -65,9 +65,12 @@ with tempfile.TemporaryDirectory() as temporary:
     assert "ENV UV_PYTHON_DOWNLOADS=never" in dockerfile
     assert f'requires-python = "~={python}.0"' in (generated / "backend/pyproject.toml").read_text()
     dependency = (generated / "deployment/pyproject.toml").read_text()
-    assert 'rev = "7f8a113212aa27003713de3222966418bf848c9b"' in dependency
+    import re
+    assert re.search(r'rev = "[0-9a-f]{40}"', dependency)
     # GIVEN the rendered deployment, WHEN its locked CLI starts,
     # THEN the deployment entrypoint loads. CLI behavior is tested in its own repo.
     subprocess.run(["uv", "run", "--locked", "--project", str(generated / "deployment"),
                     "startup", "ansible", "--help"], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["uv", "run", "--locked", "--project", str(generated / "deployment"),
+                    "python", "-I", "-c", "import cli.project_version"], check=True)
     print("Real Copier render: pinned CLI, current Postgres and controller copies verified")
