@@ -73,4 +73,9 @@ with tempfile.TemporaryDirectory() as temporary:
                     "startup", "ansible", "--help"], check=True, stdout=subprocess.DEVNULL)
     subprocess.run(["uv", "run", "--locked", "--project", str(generated / "deployment"),
                     "python", "-I", "-c", "import cli.project_version"], check=True)
+    # GIVEN the generated deployment's locked CLI, WHEN its safe-access commands
+    # are loaded, THEN an older credential-bearing runtime cannot satisfy the contract.
+    for command in ("inspect", "rotate-client-ca"):
+        subprocess.run(["uv", "run", "--locked", "--project", str(generated / "deployment"),
+                        "startup", "cluster", command, "--help"], check=True, stdout=subprocess.DEVNULL)
     print("Real Copier render: pinned CLI, current Postgres and controller copies verified")
