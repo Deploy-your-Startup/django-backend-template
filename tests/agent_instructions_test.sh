@@ -16,7 +16,8 @@ root = Path(sys.argv[1])
 readme = (root / "README.md").read_text()
 assert "startup doctor" in readme
 assert "gh auth login" in readme
-assert re.search(r"--template-version v\d+\.\d+\.\d+", readme)
+assert "The CLI selects its tested template release by default" in readme
+assert "--template-version" in readme
 assert "uv tool install deploy-your-startup-cli" not in readme
 with tempfile.TemporaryDirectory() as temporary:
     source = Path(temporary).resolve() / "source"

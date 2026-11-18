@@ -60,6 +60,8 @@ administrator access, so use this mode only for mutually trusted projects.
 Postgres and media use local node storage and need verified per-project backups.
 Shared cluster failures affect all attached applications.
 
-The Copier `deploy_ref` answer selects the shared workflow ref. Bootstrap's
-`--deployment-ref` exposes it for a reviewed branch or commit. It defaults to
-`main`, preserving existing workflow references.
+The active deployment version is the external reference in
+`.github/workflows/startup.yml`. The CLI reads it for local operations; all
+other deployment workflows call that local entry. Use `startup update` to
+select a release. Copier answers record the original render, and a successful
+Actions deployment run records what actually executed.
