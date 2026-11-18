@@ -100,4 +100,4 @@ ignore = ["E501", "ANN401", "ANN202"]
 # Django, DRF and factory_boy declare options in a nested `class Meta`, which ty
 # reports as an incompatible override of the parent class's `Meta`.
 [tool.ty.rules]
-invalid-attribute-override = "ignore"
+incompatible-attribute-override = "ignore"
