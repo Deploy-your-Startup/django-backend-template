@@ -5,6 +5,9 @@ check of the live deployment.
 
 - Test anonymous and other-account access to private data and every write; keep
   ownership checks server-side and CSRF protection on cookie-authenticated writes.
+- For owner-only writes behind an identity proxy, authorize the intended user
+  before persistence. Exercise a signed-in second user as well as a signed-out
+  visitor through the proxy. Keep reusable client IDs out of user allowlists.
 - Bound uploads (bytes, count, pixels), stored data and paid API usage per user;
   rate-limit login and registration where the app handles credentials.
 - Verify production HTTPS, Secure/HttpOnly session cookies and HSTS through the
