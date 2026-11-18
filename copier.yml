@@ -50,8 +50,8 @@ deploy_repository:
   help: Repository with the shared deployment workflows, actions and roles
 deploy_ref:
   type: str
-  default: 64ec3a5f13de5328f02272cccaa3bcffde768fcf
-  help: Release commit of the shared deployment repository (v1.0.0)
+  default: bfa2f4ceb411e303451b359db80071f5af20ca35
+  help: Release commit of the shared deployment repository
 docker_registry_host:
   type: str
   default: 'ghcr.io/§§deploy_your_startup.github_username§§'

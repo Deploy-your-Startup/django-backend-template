@@ -13,8 +13,15 @@ on:
 
 jobs:
   deploy-infrastructure:
-    uses: §§deploy_your_startup.deploy_repository§§/.github/workflows/deploy-infrastructure.yml@§§deploy_your_startup.deploy_ref§§
+    uses: ./.github/workflows/startup.yml
     with:
+      operation: infrastructure
       environment: ${{ github.event.inputs.environment || inputs.environment }}
     secrets:
       VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+      packages: write
+      id-token: write
