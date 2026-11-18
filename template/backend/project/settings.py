@@ -15,6 +15,8 @@ PROJECT_NAME = "§§deploy_your_startup.project_name§§"
 SECRET_KEY = os.environ["SECRET_KEY"] if os.getenv("PRODUCTION") else "local-dev-only"
 
 DEBUG = not os.getenv("PRODUCTION")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "local")
 

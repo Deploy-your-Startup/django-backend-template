@@ -1,3 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: backend-security-headers
+  namespace: "{{ k8s_namespace | default('default') }}"
+spec:
+  headers:
+    stsSeconds: 86400
+    contentSecurityPolicy: "base-uri 'self'; frame-ancestors 'none'"
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -5,7 +15,7 @@ metadata:
   namespace: "{{ k8s_namespace | default('default') }}"
   annotations:
     cert-manager.io/issuer: "letsencrypt-prod"
-    traefik.ingress.kubernetes.io/router.middlewares: {{ k8s_namespace | default('default') }}-redirect-to-https@kubernetescrd,{{ k8s_namespace | default('default') }}-redirect-to-base@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: {{ k8s_namespace | default('default') }}-backend-security-headers@kubernetescrd,{{ k8s_namespace | default('default') }}-redirect-to-https@kubernetescrd,{{ k8s_namespace | default('default') }}-redirect-to-base@kubernetescrd
 spec:
   tls:
     - hosts:
@@ -36,3 +46,38 @@ spec:
                 port:
                   number: 8000
 {% endfor %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: account-rate-limit
+  namespace: "{{ k8s_namespace | default('default') }}"
+spec:
+  rateLimit:
+    average: 10
+    period: 1m
+    burst: 10
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: account-entry
+  namespace: "{{ k8s_namespace | default('default') }}"
+  annotations:
+    traefik.ingress.kubernetes.io/router.priority: "1000"
+    traefik.ingress.kubernetes.io/router.middlewares: {{ k8s_namespace | default('default') }}-backend-security-headers@kubernetescrd,{{ k8s_namespace | default('default') }}-redirect-to-https@kubernetescrd,{{ k8s_namespace | default('default') }}-account-rate-limit@kubernetescrd
+spec:
+  tls:
+    - hosts: ["{{ base_domain }}"]
+      secretName: backend-tls
+  rules:
+    - host: "{{ base_domain }}"
+      http:
+        paths:
+          - path: /admin/login/
+            pathType: Exact
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000

@@ -20,6 +20,27 @@ with tempfile.TemporaryDirectory() as temporary:
     copier.run_copy(str(source), str(generated), defaults=True, unsafe=True, quiet=True,
                     data={"project_name": "role-check", "base_domain": "example.com",
                           "github_username": "example", "deploy_ref": "codex/shared-cluster"})
+    # GIVEN the generated application ingress, WHEN Ansible renders its manifests,
+    # THEN its router uses the middleware that sets HTTPS and framing policy.
+    from jinja2 import Environment, StrictUndefined
+    environment = Environment(undefined=StrictUndefined)
+    environment.filters["bool"] = bool
+    ingress = generated / "backend/deployment/templates/ingress.yml"
+    rendered = environment.from_string(ingress.read_text()).render(
+        base_domain="example.com", additional_domains=[], k8s_namespace="sample")
+    resources = [doc for doc in yaml.safe_load_all(rendered) if doc]
+    middleware = next(doc for doc in resources if "headers" in doc["spec"])
+    headers = middleware["spec"]["headers"]
+    assert headers["stsSeconds"] > 0 and "frame-ancestors" in headers["contentSecurityPolicy"]
+    reference = f"sample-{middleware['metadata']['name']}@kubernetescrd"
+    for router in (doc for doc in resources if doc["kind"] == "Ingress"):
+        assert reference in router["metadata"]["annotations"]["traefik.ingress.kubernetes.io/router.middlewares"].split(",")
+    login_router = next(doc for doc in resources if doc["metadata"]["name"] == "account-entry")
+    paths = login_router["spec"]["rules"][0]["http"]["paths"]
+    assert [(path["path"], path["pathType"]) for path in paths] == [("/admin/login/", "Exact")]
+    limiter = next(doc for doc in resources if "rateLimit" in doc["spec"])
+    assert limiter["spec"]["rateLimit"]["average"] > 0
+    assert f"sample-{limiter['metadata']['name']}@kubernetescrd" in login_router["metadata"]["annotations"]["traefik.ingress.kubernetes.io/router.middlewares"].split(",")
     workflows = list((generated / ".github/workflows").glob("*.yml"))
     callers = [yaml.safe_load(path.read_text()) for path in workflows]
     shared_jobs = [job for workflow in callers for job in workflow.get("jobs", {}).values()
