@@ -49,7 +49,7 @@ jobs:
       service: backend
       run_tests: true
       run_e2e: false
-      e2e_shards: 2
+      e2e_shards: 1
       require_coverage: true
       coverage_measured_from: Integration
       # Runs ./make.sh lint in the test image: ruff format --check, ruff check, ty.
